@@ -4,110 +4,269 @@
     ViewData["Title"] = "Student Dashboard";
 }
 
-<div class="container-fluid">
-    <h2 class="mb-4">Welcome, @Model.CurrentUser.FirstName!</h2>
+<h2>Student Dashboard</h2>
+<p class="text-muted">Welcome back, @Model.CurrentUser.FirstName @Model.CurrentUser.LastName</p>
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">My Enrollments</h5>
-                    <h2>@Model.MyEnrollments.Count</h2>
-                </div>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Active Enrollments</h6>
+                <h2 class="mb-0">@Model.ActiveEnrollmentsCount</h2>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Payments</h5>
-                    <h2>$@Model.TotalPaid.ToString("N2")</h2>
-                </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Paid</h6>
+                <h2 class="mb-0">$@Model.TotalPaid.ToString("N2")</h2>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Outstanding Balance</h5>
-                    <h2>$@Model.TotalBalance.ToString("N2")</h2>
-                </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Upcoming Classes</h6>
+                <h2 class="mb-0">@Model.UpcomingClasses.Count</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-title">Outstanding Balance</h6>
+                <h2 class="mb-0">$@Model.TotalBalance.ToString("N2")</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Enrolled Courses</h5>
+                <a asp-page="./Courses/Index" class="btn btn-sm btn-primary">Browse Courses</a>
+            </div>
+            <div class="card-body">
+                @if (Model.MyEnrollments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Enrollment Date</th>
+                                    <th>Total Fee</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in Model.MyEnrollments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@enrollment.Course.Name</strong><br />
+                                            <small class="text-muted">@enrollment.Course.Code</small>
+                                        </td>
+                                        <td>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                                        <td>$@enrollment.TotalFee.ToString("N2")</td>
+                                        <td>$@enrollment.PaidAmount.ToString("N2")</td>
+                                        <td>
+                                            @if (enrollment.Balance > 0)
+                                            {
+                                                <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">Paid</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@(enrollment.Status == EnrollmentStatus.Active ? "success" : enrollment.Status == EnrollmentStatus.Pending ? "warning" : enrollment.Status == EnrollmentStatus.Completed ? "primary" : "secondary")">
+                                                @enrollment.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a asp-page="./Courses/Details" asp-route-id="@enrollment.CourseId" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <h5>No Enrollments Yet</h5>
+                        <p>You haven't enrolled in any courses yet. Browse our course catalog to get started!</p>
+                        <a asp-page="./Courses/Index" class="btn btn-primary">Browse Courses</a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Upcoming Classes</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.UpcomingClasses.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingClasses)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Course:</strong> @schedule.Course?.Name<br />
+                                            <strong>Subject:</strong> @schedule.Subject?.Name<br />
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, yyyy h:mm tt")<br />
+                                            <strong>Location:</strong> @schedule.Location
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming classes scheduled.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Payment History</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.MyPayments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Course</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in Model.MyPayments.Take(10))
+                                {
+                                    <tr>
+                                        <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@payment.Enrollment.Course.Name</td>
+                                        <td>$@payment.Amount.ToString("N2")</td>
+                                        <td>@payment.PaymentMethod</td>
+                                        <td>@payment.ReferenceNumber</td>
+                                        <td>
+                                            <span class="badge bg-@(payment.Status == PaymentStatus.Completed ? "success" : payment.Status == PaymentStatus.Pending ? "warning" : "secondary")">
+                                                @payment.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No payment history yet.</p>
+                }
             </div>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h4>My Courses</h4>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Course</th>
-                                <th>Enrollment Date</th>
-                                <th>Total Fee</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var enrollment in Model.MyEnrollments)
-                            {
-                                <tr>
-                                    <td>@enrollment.Course.Name</td>
-                                    <td>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</td>
-                                    <td>$@enrollment.TotalFee.ToString("N2")</td>
-                                    <td>$@enrollment.PaidAmount.ToString("N2")</td>
-                                    <td>
-                                        @if (enrollment.Balance > 0)
-                                        {
-                                            <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-success">Paid</span>
-                                        }
-                                    </td>
-                                    <td><span class="badge bg-info">@enrollment.Status</span></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-page="./Courses/Index" class="btn btn-primary">
+                        <i class="bi bi-mortarboard"></i> Browse Courses
+                    </a>
+                    <a asp-page="/Account/Manage/Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-person"></i> My Profile
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h4>Payment History</h4>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Course</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Reference</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var payment in Model.MyPayments)
-                            {
-                                <tr>
-                                    <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
-                                    <td>@payment.Enrollment.Course.Name</td>
-                                    <td>$@payment.Amount.ToString("N2")</td>
-                                    <td>@payment.PaymentMethod</td>
-                                    <td>@payment.ReferenceNumber</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Recent Grades</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentGrades.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var grade in Model.RecentGrades)
+                        {
+                            var percentage = (grade.Score / grade.MaxScore) * 100;
+                            <div class="list-group-item px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-0">@grade.Subject?.Name</h6>
+                                        <small class="text-muted">@grade.Enrollment.Course.Name</small>
+                                        <br />
+                                        <span class="badge bg-info">@grade.Type</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-@(percentage >= 75 ? "success" : percentage >= 60 ? "warning" : "danger")">
+                                            @percentage.ToString("F1")%
+                                        </span>
+                                        <br />
+                                        <small class="text-muted">@grade.Score/@grade.MaxScore</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No grades recorded yet.</p>
+                }
             </div>
         </div>
+
+        @if (Model.TotalBalance > 0)
+        {
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Payment Reminder</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Outstanding Balance:</strong></p>
+                    <h3 class="text-danger">$@Model.TotalBalance.ToString("N2")</h3>
+                    <p class="small mb-0">Please contact the administration office to make a payment.</p>
+                </div>
+            </div>
+        }
     </div>
 </div>

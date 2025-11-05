@@ -1,0 +1,111 @@
+@page
+@model EnrollmentSystem.Pages.Librarian.IndexModel
+@{
+    ViewData["Title"] = "Librarian Dashboard";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Librarian Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Books</h5>
+                    <h2>@Model.TotalBooks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Available</h5>
+                    <h2>@Model.AvailableBooks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Borrowed</h5>
+                    <h2>@Model.ActiveBorrowings</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Overdue</h5>
+                    <h2>@Model.OverdueBorrowings</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>Quick Actions</h4>
+            </div>
+            <div class="list-group">
+                <a href="@Url.Page("/Librarian/Books/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Books</strong> - Add, edit, or remove books from library
+                </a>
+                <a href="@Url.Page("/Librarian/Borrowings/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Borrowings</strong> - Issue books and process returns
+                </a>
+                <a href="@Url.Page("/Librarian/Borrowings/Overdue")" class="list-group-item list-group-item-action text-danger">
+                    <strong>Overdue Books</strong> - View and manage overdue borrowings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h4>Recent Borrowings</h4>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book</th>
+                                <th>Borrower</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var borrowing in Model.RecentBorrowings)
+                            {
+                                <tr>
+                                    <td>@borrowing.Book.Title</td>
+                                    <td>@borrowing.Borrower.FirstName @borrowing.Borrower.LastName</td>
+                                    <td>@borrowing.BorrowDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        @borrowing.DueDate.ToString("MMM dd, yyyy")
+                                        @if (borrowing.DueDate < DateTime.Now && borrowing.Status == EnrollmentSystem.Models.BorrowingStatus.Active)
+                                        {
+                                            <span class="badge bg-danger ms-2">Overdue</span>
+                                        }
+                                    </td>
+                                    <td><span class="badge bg-info">@borrowing.Status</span></td>
+                                    <td>
+                                        @if (borrowing.Status == EnrollmentSystem.Models.BorrowingStatus.Active)
+                                        {
+                                            <form method="post" asp-page-handler="Return" asp-route-id="@borrowing.Id" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-success">Mark Returned</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

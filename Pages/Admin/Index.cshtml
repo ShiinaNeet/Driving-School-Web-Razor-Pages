@@ -1,0 +1,121 @@
+@page
+@model EnrollmentSystem.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Admin Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Students</h5>
+                    <h2>@Model.TotalStudents</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Courses</h5>
+                    <h2>@Model.TotalCourses</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Active Enrollments</h5>
+                    <h2>@Model.ActiveEnrollments</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Professors</h5>
+                    <h2>@Model.TotalProfessors</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h4>Quick Actions</h4>
+            <div class="list-group">
+                <a href="@Url.Page("/Admin/Courses/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Courses</strong> - View, add, edit, or delete courses
+                </a>
+                <a href="@Url.Page("/Admin/Subjects/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Subjects</strong> - View, add, edit, or delete subjects
+                </a>
+                <a href="@Url.Page("/Admin/Professors/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Professors</strong> - View, add, edit, or delete professors
+                </a>
+                <a href="@Url.Page("/Admin/Students/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Students</strong> - View, add, edit, or delete students
+                </a>
+                <a href="@Url.Page("/Admin/Enrollments/Index")" class="list-group-item list-group-item-action">
+                    <strong>Manage Enrollments</strong> - View and manage student enrollments
+                </a>
+                <a href="@Url.Page("/Admin/Payments/Index")" class="list-group-item list-group-item-action">
+                    <strong>Payment History</strong> - View and record payments
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Recent Enrollments</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var enrollment in Model.RecentEnrollments)
+                    {
+                        <tr>
+                            <td>@enrollment.Student.FirstName @enrollment.Student.LastName</td>
+                            <td>@enrollment.Course.Name</td>
+                            <td><span class="badge bg-info">@enrollment.Status</span></td>
+                            <td>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h4>Recent Payments</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model.RecentPayments)
+                    {
+                        <tr>
+                            <td>@payment.Student.FirstName @payment.Student.LastName</td>
+                            <td>$@payment.Amount.ToString("N2")</td>
+                            <td>@payment.PaymentMethod</td>
+                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

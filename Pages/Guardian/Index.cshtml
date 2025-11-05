@@ -1,0 +1,97 @@
+@page
+@model EnrollmentSystem.Pages.Guardian.IndexModel
+@{
+    ViewData["Title"] = "Guardian Dashboard";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Welcome, @Model.CurrentUser.FirstName!</h2>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h4>My Students</h4>
+            @foreach (var guardian in Model.MyGuardianRecords)
+            {
+                var student = guardian.Student;
+                var enrollments = Model.StudentEnrollments.Where(e => e.StudentId == student.Id).ToList();
+                var payments = Model.StudentPayments.Where(p => p.StudentId == student.Id).ToList();
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">@student.FirstName @student.LastName (@guardian.Relationship)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Email:</strong> @student.Email
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Phone:</strong> @student.Phone
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Status:</strong> <span class="badge bg-success">@student.Status</span>
+                            </div>
+                        </div>
+
+                        <h6>Enrollments</h6>
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Total Fee</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in enrollments)
+                                {
+                                    <tr>
+                                        <td>@enrollment.Course.Name</td>
+                                        <td>$@enrollment.TotalFee.ToString("N2")</td>
+                                        <td>$@enrollment.PaidAmount.ToString("N2")</td>
+                                        <td>
+                                            @if (enrollment.Balance > 0)
+                                            {
+                                                <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success">Paid</span>
+                                            }
+                                        </td>
+                                        <td><span class="badge bg-info">@enrollment.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <h6 class="mt-3">Recent Payments</h6>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Course</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in payments.Take(5))
+                                {
+                                    <tr>
+                                        <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@payment.Enrollment.Course.Name</td>
+                                        <td>$@payment.Amount.ToString("N2")</td>
+                                        <td>@payment.PaymentMethod</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

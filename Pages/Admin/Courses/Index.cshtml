@@ -1,0 +1,71 @@
+@page
+@model EnrollmentSystem.Pages.Admin.Courses.IndexModel
+@{
+    ViewData["Title"] = "Manage Courses";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Courses</h2>
+        <a asp-page="./Create" class="btn btn-primary">Create New Course</a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Duration (Weeks)</th>
+                        <th>Fee</th>
+                        <th>Max Students</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model.Courses)
+                    {
+                        <tr>
+                            <td>@course.Code</td>
+                            <td>@course.Name</td>
+                            <td>@course.DurationWeeks</td>
+                            <td>$@course.TotalFee.ToString("N2")</td>
+                            <td>@course.MaxStudents</td>
+                            <td>
+                                @if (course.Status == EnrollmentSystem.Models.CourseStatus.Active)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else if (course.Status == EnrollmentSystem.Models.CourseStatus.Inactive)
+                                {
+                                    <span class="badge bg-warning">Inactive</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Archived</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@course.Id" class="btn btn-sm btn-warning">Edit</a>
+                                <a asp-page="./Details" asp-route-id="@course.Id" class="btn btn-sm btn-info">Details</a>
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@course.Id" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

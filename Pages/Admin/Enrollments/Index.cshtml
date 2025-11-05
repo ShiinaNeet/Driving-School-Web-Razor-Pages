@@ -1,0 +1,83 @@
+@page
+@model EnrollmentSystem.Pages.Admin.Enrollments.IndexModel
+@{
+    ViewData["Title"] = "Manage Enrollments";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Enrollments</h2>
+        <a asp-page="./Create" class="btn btn-primary">Create New Enrollment</a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Enrollment Date</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var enrollment in Model.Enrollments)
+                    {
+                        <tr>
+                            <td>@enrollment.Student.FirstName @enrollment.Student.LastName</td>
+                            <td>@enrollment.Course.Name</td>
+                            <td>@enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</td>
+                            <td>$@enrollment.TotalFee.ToString("N2")</td>
+                            <td>$@enrollment.PaidAmount.ToString("N2")</td>
+                            <td>
+                                @if (enrollment.Balance > 0)
+                                {
+                                    <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success fw-bold">$0.00</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@GetStatusBadgeClass(enrollment.Status)">@enrollment.Status</span>
+                            </td>
+                            <td>
+                                <a asp-page="./Details" asp-route-id="@enrollment.Id" class="btn btn-sm btn-info">Details</a>
+                                <a asp-page="/Admin/Payments/Create" asp-route-enrollmentId="@enrollment.Id" class="btn btn-sm btn-success">Add Payment</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(EnrollmentSystem.Models.EnrollmentStatus status)
+    {
+        return status switch
+        {
+            EnrollmentSystem.Models.EnrollmentStatus.Active => "success",
+            EnrollmentSystem.Models.EnrollmentStatus.Pending => "warning",
+            EnrollmentSystem.Models.EnrollmentStatus.Completed => "info",
+            EnrollmentSystem.Models.EnrollmentStatus.Cancelled => "danger",
+            EnrollmentSystem.Models.EnrollmentStatus.Suspended => "secondary",
+            _ => "primary"
+        };
+    }
+}

@@ -1,0 +1,19 @@
+@page
+@model EnrollmentSystem.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h3>@ViewData["Title"]</h3>
+                    <p>You have been logged out successfully.</p>
+                    <a asp-page="/Account/Login" class="btn btn-primary">Login Again</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

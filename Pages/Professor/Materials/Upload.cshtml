@@ -1,0 +1,98 @@
+@page
+@model UploadModel
+@{
+    ViewData["Title"] = "Upload Course Material";
+}
+
+<h2>Upload Course Material</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Material Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Material.SubjectId" class="form-label">Subject</label>
+                        <select asp-for="Material.SubjectId" class="form-select" asp-items="Model.SubjectList">
+                            <option value="">-- Select Subject --</option>
+                        </select>
+                        <span asp-validation-for="Material.SubjectId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Material.Type" class="form-label">Material Type</label>
+                        <select asp-for="Material.Type" class="form-select" asp-items="Html.GetEnumSelectList<MaterialType>()">
+                            <option value="">-- Select Type --</option>
+                        </select>
+                        <span asp-validation-for="Material.Type" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="UploadFile" class="form-label">File</label>
+                        <input asp-for="UploadFile" class="form-control" type="file" />
+                        <span asp-validation-for="UploadFile" class="text-danger"></span>
+                        <div class="form-text">
+                            Max size: 50MB. Allowed formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT, MP4, AVI, MOV, ZIP
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="Material.IsPublic" class="form-check-input" type="checkbox" />
+                            <label asp-for="Material.IsPublic" class="form-check-label">
+                                Make this material public (visible to all enrolled students)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Upload Material</button>
+                        <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">Material Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><strong>Syllabus:</strong> Course outline and requirements</li>
+                    <li><strong>Lecture:</strong> Lecture notes and presentations</li>
+                    <li><strong>Assignment:</strong> Homework and assignments</li>
+                    <li><strong>Video:</strong> Video lectures and tutorials</li>
+                    <li><strong>Document:</strong> Reference materials</li>
+                    <li><strong>Other:</strong> Miscellaneous materials</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">Upload Guidelines</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Maximum file size is 50MB</li>
+                    <li>Use descriptive file names</li>
+                    <li>Public materials are visible to all enrolled students</li>
+                    <li>Private materials are only visible to you</li>
+                    <li>You can delete materials anytime</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

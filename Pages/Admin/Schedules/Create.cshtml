@@ -1,0 +1,130 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Create Schedule";
+}
+
+<h2>Create New Schedule</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Schedule Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Schedule.Title" class="form-label">Title</label>
+                        <input asp-for="Schedule.Title" class="form-control" placeholder="e.g., Defensive Driving Techniques" />
+                        <span asp-validation-for="Schedule.Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.CourseId" class="form-label">Course</label>
+                            <select asp-for="Schedule.CourseId" class="form-select" asp-items="Model.CourseList">
+                                <option value="">-- Select Course --</option>
+                            </select>
+                            <span asp-validation-for="Schedule.CourseId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.SubjectId" class="form-label">Subject (Optional)</label>
+                            <select asp-for="Schedule.SubjectId" class="form-select" asp-items="Model.SubjectList">
+                                <option value="">-- No Specific Subject --</option>
+                            </select>
+                            <span asp-validation-for="Schedule.SubjectId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Schedule.ProfessorId" class="form-label">Professor</label>
+                        <select asp-for="Schedule.ProfessorId" class="form-select" asp-items="Model.ProfessorList">
+                            <option value="">-- Select Professor --</option>
+                        </select>
+                        <span asp-validation-for="Schedule.ProfessorId" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.StartTime" class="form-label">Start Date & Time</label>
+                            <input asp-for="Schedule.StartTime" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="Schedule.StartTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.EndTime" class="form-label">End Date & Time</label>
+                            <input asp-for="Schedule.EndTime" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="Schedule.EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.Type" class="form-label">Type</label>
+                            <select asp-for="Schedule.Type" class="form-select" asp-items="Html.GetEnumSelectList<ScheduleType>()">
+                                <option value="">-- Select Type --</option>
+                            </select>
+                            <span asp-validation-for="Schedule.Type" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Schedule.Location" class="form-label">Location</label>
+                            <input asp-for="Schedule.Location" class="form-control" placeholder="e.g., Room 101, Training Ground A" />
+                            <span asp-validation-for="Schedule.Location" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Schedule.Description" class="form-label">Description (Optional)</label>
+                        <textarea asp-for="Schedule.Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Schedule.Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Create Schedule</button>
+                        <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">Schedule Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><strong>Lecture:</strong> Classroom instruction</li>
+                    <li><strong>Practical Driving:</strong> Behind-the-wheel training</li>
+                    <li><strong>Theory:</strong> Theory-based sessions</li>
+                    <li><strong>Exam:</strong> Written or practical exams</li>
+                    <li><strong>Assessment:</strong> Student evaluations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Ensure no scheduling conflicts for professors</li>
+                    <li>Provide clear location information</li>
+                    <li>Link to specific subject when applicable</li>
+                    <li>Set realistic time durations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

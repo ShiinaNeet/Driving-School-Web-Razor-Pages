@@ -1,0 +1,123 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Add Student Grade";
+}
+
+<h2>Add Student Grade</h2>
+
+@if (Model.Enrollment != null)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Student Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Student:</strong> @Model.Enrollment.Student.FirstName @Model.Enrollment.Student.LastName</p>
+                    <p><strong>Email:</strong> @Model.Enrollment.Student.Email</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Course:</strong> @Model.Enrollment.Course.Name</p>
+                    <p><strong>Enrollment Date:</strong> @Model.Enrollment.EnrollmentDate.ToString("MMM dd, yyyy")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Assessment Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" asp-for="EnrollmentId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Assessment.SubjectId" class="form-label">Subject</label>
+                        <select asp-for="Assessment.SubjectId" class="form-select" asp-items="Model.SubjectList">
+                            <option value="">-- Select Subject --</option>
+                        </select>
+                        <span asp-validation-for="Assessment.SubjectId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Assessment.Type" class="form-label">Assessment Type</label>
+                        <select asp-for="Assessment.Type" class="form-select" asp-items="Html.GetEnumSelectList<AssessmentType>()">
+                            <option value="">-- Select Type --</option>
+                        </select>
+                        <span asp-validation-for="Assessment.Type" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Assessment.Score" class="form-label">Score</label>
+                            <input asp-for="Assessment.Score" class="form-control" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="Assessment.Score" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Assessment.MaxScore" class="form-label">Maximum Score</label>
+                            <input asp-for="Assessment.MaxScore" class="form-control" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="Assessment.MaxScore" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Assessment.Remarks" class="form-label">Remarks (Optional)</label>
+                        <textarea asp-for="Assessment.Remarks" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Assessment.Remarks" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> The system will automatically determine if the student passed based on the score percentage (60% or above to pass).
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Save Grade</button>
+                        <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">Assessment Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><strong>Written Test:</strong> Theory exams and written assessments</li>
+                    <li><strong>Practical Driving:</strong> Behind-the-wheel driving tests</li>
+                    <li><strong>Theory Exam:</strong> Comprehensive theory examinations</li>
+                    <li><strong>Final Exam:</strong> Course completion exam</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">Grading Scale</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><strong>90-100%:</strong> Excellent</li>
+                    <li><strong>75-89%:</strong> Good</li>
+                    <li><strong>60-74%:</strong> Pass</li>
+                    <li><strong>Below 60%:</strong> Fail</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

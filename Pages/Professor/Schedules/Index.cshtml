@@ -1,0 +1,221 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "My Schedule";
+}
+
+<h2>My Teaching Schedule</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Classes</h6>
+                <h2 class="mb-0">@Model.TotalSchedules</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Upcoming</h6>
+                <h2 class="mb-0">@Model.UpcomingCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Completed</h6>
+                <h2 class="mb-0">@Model.CompletedCount</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Schedule</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="filterType" class="form-label">Type</label>
+                <select id="filterType" name="FilterType" class="form-select" asp-for="FilterType">
+                    <option value="">All Types</option>
+                    <option value="Lecture">Lecture</option>
+                    <option value="PracticalDriving">Practical Driving</option>
+                    <option value="Theory">Theory</option>
+                    <option value="Exam">Exam</option>
+                    <option value="Assessment">Assessment</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="filterDate" class="form-label">Date</label>
+                <input type="date" id="filterDate" name="FilterDate" class="form-control" asp-for="FilterDate" />
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Upcoming Classes</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.UpcomingSchedules.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Course:</strong> @schedule.Course?.Name<br />
+                                            @if (schedule.Subject != null)
+                                            {
+                                                <strong>Subject:</strong> @schedule.Subject.Name <br />
+                                            }
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, yyyy h:mm tt") - @schedule.EndTime.ToString("h:mm tt")<br />
+                                            @if (!string.IsNullOrEmpty(schedule.Location))
+                                            {
+                                                <strong>Location:</strong> @schedule.Location
+                                            }
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                        <span class="badge bg-@(schedule.Status == ScheduleStatus.Scheduled ? "success" : schedule.Status == ScheduleStatus.InProgress ? "warning" : "secondary")">
+                                            @schedule.Status
+                                        </span>
+                                    </div>
+                                    <div class="ms-2">
+                                        @if (schedule.Status == ScheduleStatus.Scheduled)
+                                        {
+                                            <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                                                <input type="hidden" name="scheduleId" value="@schedule.Id" />
+                                                <input type="hidden" name="status" value="InProgress" />
+                                                <button type="submit" class="btn btn-sm btn-warning mb-1">Start</button>
+                                            </form>
+                                        }
+                                        @if (schedule.Status == ScheduleStatus.InProgress)
+                                        {
+                                            <form method="post" asp-page-handler="UpdateStatus" class="d-inline">
+                                                <input type="hidden" name="scheduleId" value="@schedule.Id" />
+                                                <input type="hidden" name="status" value="Completed" />
+                                                <button type="submit" class="btn btn-sm btn-success mb-1">Complete</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming classes scheduled.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Recent Past Classes</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.PastSchedules.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.PastSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Course:</strong> @schedule.Course?.Name<br />
+                                            @if (schedule.Subject != null)
+                                            {
+                                                <strong>Subject:</strong> @schedule.Subject.Name <br />
+                                            }
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, yyyy h:mm tt")<br />
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                        <span class="badge bg-@(schedule.Status == ScheduleStatus.Completed ? "success" : schedule.Status == ScheduleStatus.Cancelled ? "danger" : "secondary")">
+                                            @schedule.Status
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No past classes found.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Schedules.Any() && (!string.IsNullOrEmpty(Model.FilterType) || Model.FilterDate.HasValue))
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Filtered Results</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Course</th>
+                            <th>Subject</th>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var schedule in Model.Schedules)
+                        {
+                            <tr>
+                                <td>@schedule.Title</td>
+                                <td>@schedule.Course?.Name</td>
+                                <td>@schedule.Subject?.Name</td>
+                                <td>@schedule.StartTime.ToString("MMM dd, yyyy h:mm tt")</td>
+                                <td><span class="badge bg-info">@schedule.Type</span></td>
+                                <td>
+                                    <span class="badge bg-@(schedule.Status == ScheduleStatus.Scheduled ? "success" : schedule.Status == ScheduleStatus.Completed ? "primary" : schedule.Status == ScheduleStatus.Cancelled ? "danger" : "warning")">
+                                        @schedule.Status
+                                    </span>
+                                </td>
+                                <td>@schedule.Location</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

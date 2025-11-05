@@ -1,0 +1,90 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "My Subjects";
+}
+
+<h2>My Subjects</h2>
+<p class="text-muted">Subjects you are currently teaching</p>
+
+@if (Model.Subjects.Any())
+{
+    <div class="row">
+        @foreach (var subjectInfo in Model.Subjects)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(subjectInfo.Subject.ImagePath))
+                    {
+                        <img src="/@subjectInfo.Subject.ImagePath" class="card-img-top" alt="@subjectInfo.Subject.Name" style="height: 200px; object-fit: cover;" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            @subjectInfo.Subject.Code - @subjectInfo.Subject.Name
+                        </h5>
+                        <p class="card-text">@subjectInfo.Subject.Description</p>
+
+                        <div class="mb-3">
+                            <span class="badge bg-primary me-1">@subjectInfo.Subject.Credits Credits</span>
+                            <span class="badge bg-@(subjectInfo.Subject.Status == SubjectStatus.Active ? "success" : "secondary")">
+                                @subjectInfo.Subject.Status
+                            </span>
+                        </div>
+
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <h6 class="text-primary mb-0">@subjectInfo.EnrolledStudents</h6>
+                                    <small class="text-muted">Students</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <h6 class="text-success mb-0">@subjectInfo.MaterialsCount</h6>
+                                    <small class="text-muted">Materials</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded p-2">
+                                    <h6 class="text-info mb-0">@subjectInfo.UpcomingClasses</h6>
+                                    <small class="text-muted">Classes</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (subjectInfo.Courses.Any())
+                        {
+                            <div class="mb-3">
+                                <h6>Used in Courses:</h6>
+                                <ul class="list-unstyled">
+                                    @foreach (var course in subjectInfo.Courses)
+                                    {
+                                        <li>
+                                            <i class="bi bi-mortarboard"></i> @course.Name
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2">
+                            <a asp-page="/Professor/Materials/Upload" asp-route-subjectId="@subjectInfo.Subject.Id" class="btn btn-sm btn-primary">
+                                <i class="bi bi-upload"></i> Upload Material
+                            </a>
+                            <a asp-page="/Professor/Assessments/Index" asp-route-subjectId="@subjectInfo.Subject.Id" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-clipboard-check"></i> View Grades
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No Subjects Assigned</h5>
+        <p>You don't have any subjects assigned to you yet. Please contact the administrator.</p>
+    </div>
+}

@@ -42,6 +42,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Librarian", "RequireLibrarianRole");
     options.Conventions.AuthorizeFolder("/Student", "RequireStudentRole");
     options.Conventions.AuthorizeFolder("/Guardian", "RequireGuardianRole");
+    options.Conventions.AuthorizeFolder("/Professor", "RequireProfessorRole");
 });
 
 builder.Services.AddAuthorization(options =>

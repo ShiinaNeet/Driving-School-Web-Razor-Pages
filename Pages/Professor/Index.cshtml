@@ -1,0 +1,161 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Professor Dashboard";
+}
+
+<h2>Professor Dashboard</h2>
+<p class="text-muted">Welcome, @Model.ProfessorName</p>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">My Subjects</h6>
+                <h2 class="mb-0">@Model.SubjectCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Upcoming Classes</h6>
+                <h2 class="mb-0">@Model.UpcomingScheduleCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Pending Assessments</h6>
+                <h2 class="mb-0">@Model.PendingAssessmentCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Students</h6>
+                <h2 class="mb-0">@Model.TotalStudents</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Subjects</h5>
+                <a asp-page="./Subjects/Index" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                @if (Model.Subjects.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var subject in Model.Subjects)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        @if (!string.IsNullOrEmpty(subject.ImagePath))
+                                        {
+                                            <img src="/@subject.ImagePath" alt="@subject.Name" class="me-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        }
+                                        <strong>@subject.Code</strong> - @subject.Name
+                                        <br />
+                                        <small class="text-muted">@subject.Credits credits</small>
+                                    </div>
+                                    <span class="badge bg-@(subject.Status == SubjectStatus.Active ? "success" : "secondary")">
+                                        @subject.Status
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No subjects assigned to you yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Upcoming Classes</h5>
+                <a asp-page="./Schedules/Index" class="btn btn-sm btn-success">View Schedule</a>
+            </div>
+            <div class="card-body">
+                @if (Model.UpcomingSchedules.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <small class="text-muted">
+                                            @schedule.StartTime.ToString("MMM dd, yyyy h:mm tt")
+                                            @if (!string.IsNullOrEmpty(schedule.Location))
+                                            {
+                                                <span> - @schedule.Location</span>
+                                            }
+                                        </small>
+                                        <br />
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming classes scheduled.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a asp-page="./Schedules/Index" class="btn btn-lg btn-outline-primary w-100">
+                            <i class="bi bi-calendar"></i><br />
+                            View Schedule
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a asp-page="./Attendance/Index" class="btn btn-lg btn-outline-success w-100">
+                            <i class="bi bi-check-circle"></i><br />
+                            Mark Attendance
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a asp-page="./Assessments/Index" class="btn btn-lg btn-outline-warning w-100">
+                            <i class="bi bi-clipboard-check"></i><br />
+                            Manage Grades
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a asp-page="./Materials/Index" class="btn btn-lg btn-outline-info w-100">
+                            <i class="bi bi-file-earmark"></i><br />
+                            Course Materials
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

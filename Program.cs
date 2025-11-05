@@ -1,5 +1,9 @@
 using EnrollmentSystem.Data;
+using EnrollmentSystem.Hubs;
 using EnrollmentSystem.Models;
+using EnrollmentSystem.Services;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,6 +53,29 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireProfessorRole", policy => policy.RequireRole("Professor"));
 });
 
+// Add SignalR for real-time notifications and chat
+builder.Services.AddSignalR();
+
+// Add Hangfire for background jobs
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+    {
+        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+        QueuePollInterval = TimeSpan.Zero,
+        UseRecommendedIsolationLevel = true,
+        DisableGlobalLocks = true
+    }));
+
+builder.Services.AddHangfireServer();
+
+// Register custom services
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<PendingPaymentNotificationJob>();
+
 var app = builder.Build();
 
 // Seed database
@@ -89,6 +116,22 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map SignalR hubs
+app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<ChatHub>("/chatHub");
+
+// Configure Hangfire dashboard (only accessible to admins)
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
+// Schedule recurring job to check pending payments (runs daily at 9 AM)
+RecurringJob.AddOrUpdate<PendingPaymentNotificationJob>(
+    "check-pending-payments",
+    job => job.CheckPendingPaymentsAsync(),
+    "0 9 * * *"); // Cron expression: daily at 9:00 AM
 
 app.MapRazorPages();
 

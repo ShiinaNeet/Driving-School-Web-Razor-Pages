@@ -28,3 +28,88 @@ body {
   white-space: nowrap;
   line-height: 60px;
 }
+
+/* Notification and Chat Styles */
+.notification-item {
+  border-left: 3px solid #0d6efd;
+  background-color: #f8f9fa;
+}
+
+.notification-item.read {
+  opacity: 0.6;
+  background-color: white;
+}
+
+.notification-item.enrollment {
+  border-left-color: #0d6efd;
+}
+
+.notification-item.payment {
+  border-left-color: #198754;
+}
+
+.notification-item.library {
+  border-left-color: #ffc107;
+}
+
+.notification-item.system {
+  border-left-color: #dc3545;
+}
+
+.notification-item.course {
+  border-left-color: #6f42c1;
+}
+
+.notification-item.chat {
+  border-left-color: #20c997;
+}
+
+.chat-contact:hover {
+  background-color: #f8f9fa;
+}
+
+.chat-contact.active {
+  background-color: #e9ecef;
+}
+
+.online-status {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #6c757d;
+}
+
+.online-status.online {
+  background-color: #198754;
+  box-shadow: 0 0 4px #198754;
+}
+
+.online-status.offline {
+  background-color: #6c757d;
+}
+
+.message {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#notificationBadge,
+#unreadChatBadge {
+  font-size: 0.65rem;
+  padding: 0.25em 0.4em;
+}
+
+.toast-container {
+  z-index: 9999;
+}

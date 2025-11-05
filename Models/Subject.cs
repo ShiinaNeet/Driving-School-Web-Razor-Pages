@@ -24,6 +24,8 @@ public class Subject
 
     public SubjectStatus Status { get; set; } = SubjectStatus.Active;
 
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
@@ -32,6 +34,9 @@ public class Subject
     public Professor? Professor { get; set; }
 
     public ICollection<CourseSubject> CourseSubjects { get; set; } = new List<CourseSubject>();
+    public ICollection<SubjectMaterial> Materials { get; set; } = new List<SubjectMaterial>();
+    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+    public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
 }
 
 public enum SubjectStatus

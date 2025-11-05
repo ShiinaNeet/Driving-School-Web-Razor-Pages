@@ -35,6 +35,7 @@ public class Professor
     public ApplicationUser User { get; set; } = null!;
 
     public ICollection<Subject> Subjects { get; set; } = new List<Subject>();
+    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 }
 
 public enum EmploymentStatus

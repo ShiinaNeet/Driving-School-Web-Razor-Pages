@@ -23,6 +23,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatConnection> ChatConnections { get; set; }
+    public DbSet<CourseMaterial> CourseMaterials { get; set; }
+    public DbSet<SubjectMaterial> SubjectMaterials { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<Attendance> Attendances { get; set; }
+    public DbSet<Assessment> Assessments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -151,5 +156,64 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         modelBuilder.Entity<ChatConnection>()
             .HasIndex(cc => cc.ConnectionId);
+
+        // Configure CourseMaterial
+        modelBuilder.Entity<CourseMaterial>()
+            .HasOne(cm => cm.Course)
+            .WithMany(c => c.Materials)
+            .HasForeignKey(cm => cm.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure SubjectMaterial
+        modelBuilder.Entity<SubjectMaterial>()
+            .HasOne(sm => sm.Subject)
+            .WithMany(s => s.Materials)
+            .HasForeignKey(sm => sm.SubjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Schedule
+        modelBuilder.Entity<Schedule>()
+            .HasOne(s => s.Course)
+            .WithMany(c => c.Schedules)
+            .HasForeignKey(s => s.CourseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Schedule>()
+            .HasOne(s => s.Subject)
+            .WithMany(sub => sub.Schedules)
+            .HasForeignKey(s => s.SubjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Schedule>()
+            .HasOne(s => s.Professor)
+            .WithMany(p => p.Schedules)
+            .HasForeignKey(s => s.ProfessorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure Attendance
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Schedule)
+            .WithMany(s => s.Attendances)
+            .HasForeignKey(a => a.ScheduleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.Student)
+            .WithMany(u => u.Attendances)
+            .HasForeignKey(a => a.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure Assessment
+        modelBuilder.Entity<Assessment>()
+            .HasOne(a => a.Enrollment)
+            .WithMany(e => e.Assessments)
+            .HasForeignKey(a => a.EnrollmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Assessment>()
+            .HasOne(a => a.Subject)
+            .WithMany(s => s.Assessments)
+            .HasForeignKey(a => a.SubjectId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

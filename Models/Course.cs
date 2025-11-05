@@ -32,12 +32,16 @@ public class Course
 
     public string? CertificateTemplate { get; set; }
 
+    public string? ImagePath { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
     // Navigation properties
     public ICollection<CourseSubject> CourseSubjects { get; set; } = new List<CourseSubject>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+    public ICollection<CourseMaterial> Materials { get; set; } = new List<CourseMaterial>();
+    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 }
 
 public enum CourseStatus

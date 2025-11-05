@@ -75,6 +75,7 @@ builder.Services.AddHangfireServer();
 // Register custom services
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<PendingPaymentNotificationJob>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 

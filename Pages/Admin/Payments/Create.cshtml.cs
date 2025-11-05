@@ -1,5 +1,6 @@
 using EnrollmentSystem.Data;
 using EnrollmentSystem.Models;
+using EnrollmentSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,11 +13,13 @@ public class CreateModel : PageModel
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly INotificationService _notificationService;
 
-    public CreateModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+    public CreateModel(ApplicationDbContext context, UserManager<ApplicationUser> userManager, INotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     [BindProperty]
@@ -66,6 +69,56 @@ public class CreateModel : PageModel
 
         _context.Payments.Add(Payment);
         await _context.SaveChangesAsync();
+
+        // Send notifications
+        var student = await _context.Users.FindAsync(enrollment.StudentId);
+        var course = await _context.Courses.FindAsync(enrollment.CourseId);
+
+        if (student != null && course != null)
+        {
+            var studentName = $"{student.FirstName} {student.LastName}";
+
+            // Notify student
+            await _notificationService.SendNotificationAsync(
+                enrollment.StudentId,
+                "Payment Received",
+                $"Payment of ${Payment.Amount:N2} has been recorded for {course.Name}. Remaining balance: ${enrollment.Balance:N2}",
+                NotificationType.Payment,
+                Payment.Id.ToString(),
+                "Payment"
+            );
+
+            // Notify guardians
+            var guardians = await _context.Guardians
+                .Where(g => g.StudentId == enrollment.StudentId)
+                .Select(g => g.UserId)
+                .ToListAsync();
+
+            foreach (var guardianId in guardians)
+            {
+                await _notificationService.SendNotificationAsync(
+                    guardianId,
+                    "Student Payment Received",
+                    $"Payment of ${Payment.Amount:N2} has been recorded for {studentName}'s enrollment in {course.Name}. Remaining balance: ${enrollment.Balance:N2}",
+                    NotificationType.Payment,
+                    Payment.Id.ToString(),
+                    "Payment"
+                );
+            }
+
+            // Notify admin who recorded it
+            if (currentUser != null)
+            {
+                await _notificationService.SendNotificationAsync(
+                    currentUser.Id,
+                    "Payment Recorded",
+                    $"Successfully recorded payment of ${Payment.Amount:N2} for {studentName}",
+                    NotificationType.Payment,
+                    Payment.Id.ToString(),
+                    "Payment"
+                );
+            }
+        }
 
         TempData["Message"] = "Payment recorded successfully.";
         return RedirectToPage("./Index");

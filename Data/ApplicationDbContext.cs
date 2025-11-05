@@ -20,6 +20,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Payment> Payments { get; set; }
     public DbSet<LibraryBook> LibraryBooks { get; set; }
     public DbSet<BookBorrowing> BookBorrowings { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<ChatConnection> ChatConnections { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,5 +124,32 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.BookBorrowings)
             .HasForeignKey(bb => bb.BorrowerId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure Notification
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany(u => u.Notifications)
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure ChatMessage
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne(cm => cm.Sender)
+            .WithMany(u => u.SentMessages)
+            .HasForeignKey(cm => cm.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne(cm => cm.Receiver)
+            .WithMany(u => u.ReceivedMessages)
+            .HasForeignKey(cm => cm.ReceiverId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Create index on ChatConnection for quick lookup
+        modelBuilder.Entity<ChatConnection>()
+            .HasIndex(cc => cc.UserId);
+
+        modelBuilder.Entity<ChatConnection>()
+            .HasIndex(cc => cc.ConnectionId);
     }
 }

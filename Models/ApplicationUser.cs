@@ -22,6 +22,9 @@ public class ApplicationUser : IdentityUser
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public ICollection<BookBorrowing> BookBorrowings { get; set; } = new List<BookBorrowing>();
+    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public ICollection<ChatMessage> SentMessages { get; set; } = new List<ChatMessage>();
+    public ICollection<ChatMessage> ReceivedMessages { get; set; } = new List<ChatMessage>();
 }
 
 public enum Gender

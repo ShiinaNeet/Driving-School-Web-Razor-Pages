@@ -1,0 +1,171 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Assessment Overview";
+}
+
+<h2>Assessment Overview</h2>
+<p class="text-muted">System-wide grade and assessment tracking</p>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h5><i class="bi bi-clipboard-check"></i> Assessment Statistics</h5>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Assessments</h6>
+                <h2 class="mb-0">@Model.TotalAssessments</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Passed</h6>
+                <h2 class="mb-0">@Model.PassedCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-title">Failed</h6>
+                <h2 class="mb-0">@Model.FailedCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Average Score</h6>
+                <h2 class="mb-0">@Model.AverageScore.ToString("F1")%</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Pass Rate</h6>
+                <h2 class="mb-0">@Model.PassRate.ToString("F1")%</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Assessment Records</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="filterCourseId" class="form-label">Course</label>
+                <select id="filterCourseId" name="FilterCourseId" class="form-select" asp-for="FilterCourseId" asp-items="Model.CourseList">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterSubjectId" class="form-label">Subject</label>
+                <select id="filterSubjectId" name="FilterSubjectId" class="form-select" asp-for="FilterSubjectId" asp-items="Model.SubjectList">
+                    <option value="">All Subjects</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterStudentId" class="form-label">Student</label>
+                <select id="filterStudentId" name="FilterStudentId" class="form-select" asp-for="FilterStudentId" asp-items="Model.StudentList">
+                    <option value="">All Students</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterType" class="form-label">Assessment Type</label>
+                <select id="filterType" name="FilterType" class="form-select" asp-for="FilterType">
+                    <option value="">All Types</option>
+                    <option value="WrittenTest">Written Test</option>
+                    <option value="PracticalDriving">Practical Driving</option>
+                    <option value="TheoryExam">Theory Exam</option>
+                    <option value="FinalExam">Final Exam</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+        <div class="mt-2">
+            <a asp-page="./Index" class="btn btn-secondary btn-sm">Clear Filters</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Assessment Records (@Model.Assessments.Count)</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Assessments.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Subject</th>
+                            <th>Type</th>
+                            <th>Score</th>
+                            <th>Max Score</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model.Assessments)
+                        {
+                            var percentage = (record.Assessment.Score / record.Assessment.MaxScore) * 100;
+                            <tr>
+                                <td>@record.Assessment.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <strong>@record.Student.FirstName @record.Student.LastName</strong><br />
+                                    <small class="text-muted">@record.Student.Email</small>
+                                </td>
+                                <td>@record.Enrollment.Course.Name</td>
+                                <td>@record.Assessment.Subject?.Name</td>
+                                <td><span class="badge bg-info">@record.Assessment.Type</span></td>
+                                <td>@record.Assessment.Score</td>
+                                <td>@record.Assessment.MaxScore</td>
+                                <td>
+                                    <span class="badge bg-@(percentage >= 75 ? "success" : percentage >= 60 ? "warning" : "danger")">
+                                        @percentage.ToString("F1")%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(record.Assessment.Passed ? "success" : "danger")">
+                                        @(record.Assessment.Passed ? "Passed" : "Failed")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(record.Assessment.Remarks))
+                                    {
+                                        <small>@record.Assessment.Remarks</small>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h5>No Assessment Records Found</h5>
+                <p>No assessment records match your filter criteria. Try adjusting the filters or check back later.</p>
+            </div>
+        }
+    </div>
+</div>

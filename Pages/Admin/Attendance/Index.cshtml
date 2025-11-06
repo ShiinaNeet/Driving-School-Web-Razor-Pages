@@ -1,0 +1,172 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Attendance Overview";
+}
+
+<h2>Attendance Overview</h2>
+<p class="text-muted">System-wide attendance tracking and statistics</p>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h5><i class="bi bi-bar-chart"></i> Attendance Statistics</h5>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Total Records</h6>
+                <h2 class="mb-0">@Model.TotalRecords</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Present</h6>
+                <h2 class="mb-0">@Model.PresentCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-title">Absent</h6>
+                <h2 class="mb-0">@Model.AbsentCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Late</h6>
+                <h2 class="mb-0">@Model.LateCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Attendance Rate</h6>
+                <h2 class="mb-0">@Model.AttendanceRate.ToString("F1")%</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Attendance Records</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="filterCourseId" class="form-label">Course</label>
+                <select id="filterCourseId" name="FilterCourseId" class="form-select" asp-for="FilterCourseId" asp-items="Model.CourseList">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterProfessorId" class="form-label">Professor</label>
+                <select id="filterProfessorId" name="FilterProfessorId" class="form-select" asp-for="FilterProfessorId" asp-items="Model.ProfessorList">
+                    <option value="">All Professors</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterStudentId" class="form-label">Student</label>
+                <select id="filterStudentId" name="FilterStudentId" class="form-select" asp-for="FilterStudentId" asp-items="Model.StudentList">
+                    <option value="">All Students</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="filterDate" class="form-label">Date</label>
+                <input type="date" id="filterDate" name="FilterDate" class="form-control" asp-for="FilterDate" />
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+        <div class="mt-2">
+            <a asp-page="./Index" class="btn btn-secondary btn-sm">Clear Filters</a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Attendance Records (@Model.AttendanceRecords.Count)</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.AttendanceRecords.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Subject</th>
+                            <th>Professor</th>
+                            <th>Class Type</th>
+                            <th>Status</th>
+                            <th>Check-in Time</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model.AttendanceRecords)
+                        {
+                            <tr>
+                                <td>@record.Schedule.StartTime.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <strong>@record.Student.FirstName @record.Student.LastName</strong><br />
+                                    <small class="text-muted">@record.Student.Email</small>
+                                </td>
+                                <td>@record.Schedule.Course?.Name</td>
+                                <td>@record.Schedule.Subject?.Name</td>
+                                <td>
+                                    @if (record.Schedule.Professor != null)
+                                    {
+                                        <span>@record.Schedule.Professor.User.FirstName @record.Schedule.Professor.User.LastName</span>
+                                    }
+                                </td>
+                                <td><span class="badge bg-info">@record.Schedule.Type</span></td>
+                                <td>
+                                    <span class="badge bg-@(record.Attendance.Status == AttendanceStatus.Present ? "success" : record.Attendance.Status == AttendanceStatus.Late ? "warning" : record.Attendance.Status == AttendanceStatus.Excused ? "info" : "danger")">
+                                        @record.Attendance.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (record.Attendance.CheckInTime.HasValue)
+                                    {
+                                        <span>@record.Attendance.CheckInTime.Value.ToString("h:mm tt")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(record.Attendance.Remarks))
+                                    {
+                                        <small>@record.Attendance.Remarks</small>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h5>No Attendance Records Found</h5>
+                <p>No attendance records match your filter criteria. Try adjusting the filters or check back later.</p>
+            </div>
+        }
+    </div>
+</div>

@@ -13,6 +13,9 @@ namespace EnrollmentSystem.Models
         public int? ProfessorId { get; set; }
         public Professor? Professor { get; set; }
 
+        public int? VehicleId { get; set; }
+        public Vehicle? Vehicle { get; set; }
+
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
 

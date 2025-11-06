@@ -77,6 +77,11 @@ builder.Services.AddHangfireServer();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<PendingPaymentNotificationJob>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
+builder.Services.AddScoped<IGdprService, GdprService>();
+builder.Services.AddScoped<IEmailCampaignService, EmailCampaignService>();
 
 var app = builder.Build();
 

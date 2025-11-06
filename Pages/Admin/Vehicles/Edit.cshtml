@@ -1,0 +1,190 @@
+@page
+@model EnrollmentSystem.Pages.Admin.Vehicles.EditModel
+@{
+    ViewData["Title"] = "Edit Vehicle";
+}
+
+<h2><i class="bi bi-pencil-square me-2"></i>Edit Vehicle</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" asp-for="Vehicle.Id" />
+                    <input type="hidden" asp-for="Vehicle.CreatedAt" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <h5 class="card-title mb-3">Vehicle Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.Make" class="form-label"></label>
+                            <input asp-for="Vehicle.Make" class="form-control" />
+                            <span asp-validation-for="Vehicle.Make" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.Model" class="form-label"></label>
+                            <input asp-for="Vehicle.Model" class="form-control" />
+                            <span asp-validation-for="Vehicle.Model" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Year" class="form-label"></label>
+                            <input asp-for="Vehicle.Year" class="form-control" type="number" min="1900" max="2099" />
+                            <span asp-validation-for="Vehicle.Year" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Color" class="form-label"></label>
+                            <input asp-for="Vehicle.Color" class="form-control" />
+                            <span asp-validation-for="Vehicle.Color" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Capacity" class="form-label"></label>
+                            <input asp-for="Vehicle.Capacity" class="form-control" type="number" min="1" max="20" />
+                            <span asp-validation-for="Vehicle.Capacity" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.LicensePlate" class="form-label"></label>
+                            <input asp-for="Vehicle.LicensePlate" class="form-control" />
+                            <span asp-validation-for="Vehicle.LicensePlate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.VIN" class="form-label"></label>
+                            <input asp-for="Vehicle.VIN" class="form-control" />
+                            <span asp-validation-for="Vehicle.VIN" class="text-danger"></span>
+                            <small class="form-text text-muted">Vehicle Identification Number</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Type" class="form-label"></label>
+                            <select asp-for="Vehicle.Type" class="form-select" asp-items="Html.GetEnumSelectList<EnrollmentSystem.Models.VehicleType>()"></select>
+                            <span asp-validation-for="Vehicle.Type" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Transmission" class="form-label"></label>
+                            <select asp-for="Vehicle.Transmission" class="form-select" asp-items="Html.GetEnumSelectList<EnrollmentSystem.Models.TransmissionType>()"></select>
+                            <span asp-validation-for="Vehicle.Transmission" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.Status" class="form-label"></label>
+                            <select asp-for="Vehicle.Status" class="form-select" asp-items="Html.GetEnumSelectList<EnrollmentSystem.Models.VehicleStatus>()"></select>
+                            <span asp-validation-for="Vehicle.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.CurrentMileage" class="form-label"></label>
+                            <input asp-for="Vehicle.CurrentMileage" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Vehicle.CurrentMileage" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.FuelLevel" class="form-label">Fuel Level (%)</label>
+                            <input asp-for="Vehicle.FuelLevel" class="form-control" type="number" min="0" max="100" step="0.1" />
+                            <span asp-validation-for="Vehicle.FuelLevel" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Vehicle.LocationId" class="form-label">Location</label>
+                            <select asp-for="Vehicle.LocationId" class="form-select" asp-items="Model.Locations">
+                                <option value="">-- Not Assigned --</option>
+                            </select>
+                            <span asp-validation-for="Vehicle.LocationId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h5 class="card-title mb-3">Important Dates</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.PurchaseDate" class="form-label"></label>
+                            <input asp-for="Vehicle.PurchaseDate" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.PurchaseDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.RegistrationExpiry" class="form-label"></label>
+                            <input asp-for="Vehicle.RegistrationExpiry" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.RegistrationExpiry" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.InsuranceExpiry" class="form-label"></label>
+                            <input asp-for="Vehicle.InsuranceExpiry" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.InsuranceExpiry" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.InspectionExpiry" class="form-label"></label>
+                            <input asp-for="Vehicle.InspectionExpiry" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.InspectionExpiry" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h5 class="card-title mb-3">Service Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.LastServiceDate" class="form-label"></label>
+                            <input asp-for="Vehicle.LastServiceDate" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.LastServiceDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.LastServiceMileage" class="form-label"></label>
+                            <input asp-for="Vehicle.LastServiceMileage" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Vehicle.LastServiceMileage" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.NextServiceDate" class="form-label"></label>
+                            <input asp-for="Vehicle.NextServiceDate" class="form-control" type="date" />
+                            <span asp-validation-for="Vehicle.NextServiceDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Vehicle.NextServiceMileage" class="form-label"></label>
+                            <input asp-for="Vehicle.NextServiceMileage" class="form-control" type="number" />
+                            <span asp-validation-for="Vehicle.NextServiceMileage" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Vehicle.Notes" class="form-label"></label>
+                        <textarea asp-for="Vehicle.Notes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Vehicle.Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="Vehicle.IsActive" class="form-check-input" type="checkbox" />
+                        <label asp-for="Vehicle.IsActive" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-page="./Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

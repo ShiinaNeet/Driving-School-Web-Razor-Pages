@@ -27,6 +27,9 @@ public class Professor
 
     public EmploymentStatus EmploymentStatus { get; set; } = EmploymentStatus.FullTime;
 
+    public int? LocationId { get; set; }
+    public Location? Location { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 

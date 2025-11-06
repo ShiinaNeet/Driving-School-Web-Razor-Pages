@@ -1,0 +1,179 @@
+@page
+@model EnrollmentSystem.Pages.Admin.VehicleMaintenance.IndexModel
+@{
+    ViewData["Title"] = "Vehicle Maintenance";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-wrench-adjustable-circle-fill me-2"></i>Vehicle Maintenance</h2>
+    <a asp-page="./Create" asp-route-vehicleId="@Model.FilterVehicleId" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Schedule Maintenance
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Vehicle</label>
+                    <select name="FilterVehicleId" class="form-select" asp-items="Model.Vehicles">
+                        <option value="">All Vehicles</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Filter by Status</label>
+                    <select name="FilterStatus" class="form-select" asp-items="Html.GetEnumSelectList<EnrollmentSystem.Models.MaintenanceStatus>()">
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary me-2">
+                        <i class="bi bi-funnel me-1"></i>Filter
+                    </button>
+                    <a asp-page="./Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!Model.MaintenanceRecords.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>No maintenance records found.
+    </div>
+}
+else
+{
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Scheduled</h6>
+                    <h3 class="card-title text-info">@Model.MaintenanceRecords.Count(m => m.Status == EnrollmentSystem.Models.MaintenanceStatus.Scheduled)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">In Progress</h6>
+                    <h3 class="card-title text-warning">@Model.MaintenanceRecords.Count(m => m.Status == EnrollmentSystem.Models.MaintenanceStatus.InProgress)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Completed</h6>
+                    <h3 class="card-title text-success">@Model.MaintenanceRecords.Count(m => m.Status == EnrollmentSystem.Models.MaintenanceStatus.Completed)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Cost</h6>
+                    <h3 class="card-title text-primary">$@Model.MaintenanceRecords.Where(m => m.Cost.HasValue).Sum(m => m.Cost!.Value).ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Vehicle</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Scheduled Date</th>
+                            <th>Completed Date</th>
+                            <th>Status</th>
+                            <th>Cost</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var maintenance in Model.MaintenanceRecords)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@maintenance.Vehicle.Year @maintenance.Vehicle.Make @maintenance.Vehicle.Model</strong><br />
+                                    <small class="text-muted">@maintenance.Vehicle.LicensePlate</small>
+                                </td>
+                                <td>@maintenance.Type</td>
+                                <td>@maintenance.Description</td>
+                                <td>@maintenance.ScheduledDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (maintenance.CompletedDate.HasValue)
+                                    {
+                                        <text>@maintenance.CompletedDate.Value.ToString("MMM dd, yyyy")</text>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (maintenance.Status)
+                                    {
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Scheduled:
+                                            <span class="badge bg-info text-dark">Scheduled</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.InProgress:
+                                            <span class="badge bg-warning text-dark">In Progress</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Completed:
+                                            <span class="badge bg-success">Completed</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Cancelled:
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (maintenance.Cost.HasValue)
+                                    {
+                                        <text>$@maintenance.Cost.Value.ToString("N2")</text>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-page="./Details" asp-route-id="@maintenance.Id" class="btn btn-outline-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-page="./Edit" asp-route-id="@maintenance.Id" class="btn btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-page="./Delete" asp-route-id="@maintenance.Id" class="btn btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-page="/Admin/Vehicles/Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Vehicles
+    </a>
+</div>

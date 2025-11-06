@@ -28,6 +28,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<Attendance> Attendances { get; set; }
     public DbSet<Assessment> Assessments { get; set; }
+    public DbSet<Vehicle> Vehicles { get; set; }
+    public DbSet<VehicleMaintenance> VehicleMaintenances { get; set; }
+    public DbSet<Location> Locations { get; set; }
+    public DbSet<Certificate> Certificates { get; set; }
+    public DbSet<TheoryTest> TheoryTests { get; set; }
+    public DbSet<TheoryQuestion> TheoryQuestions { get; set; }
+    public DbSet<TheoryTestAttempt> TheoryTestAttempts { get; set; }
+    public DbSet<LessonPackage> LessonPackages { get; set; }
+    public DbSet<PackagePurchase> PackagePurchases { get; set; }
+    public DbSet<PromoCode> PromoCodes { get; set; }
+    public DbSet<Referral> Referrals { get; set; }
+    public DbSet<WaitingList> WaitingLists { get; set; }
+    public DbSet<StudentDocument> StudentDocuments { get; set; }
+    public DbSet<InstructorRating> InstructorRatings { get; set; }
+    public DbSet<DrivingSkill> DrivingSkills { get; set; }
+    public DbSet<SkillAssessment> SkillAssessments { get; set; }
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<StudentAchievement> StudentAchievements { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -214,6 +233,68 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(a => a.Subject)
             .WithMany(s => s.Assessments)
             .HasForeignKey(a => a.SubjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure Vehicle
+        modelBuilder.Entity<Vehicle>()
+            .HasIndex(v => v.LicensePlate)
+            .IsUnique();
+
+        modelBuilder.Entity<Vehicle>()
+            .HasIndex(v => v.VIN)
+            .IsUnique();
+
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.Location)
+            .WithMany(l => l.Vehicles)
+            .HasForeignKey(v => v.LocationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure VehicleMaintenance
+        modelBuilder.Entity<VehicleMaintenance>()
+            .HasOne(vm => vm.Vehicle)
+            .WithMany(v => v.MaintenanceRecords)
+            .HasForeignKey(vm => vm.VehicleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure Schedule-Vehicle relationship
+        modelBuilder.Entity<Schedule>()
+            .HasOne(s => s.Vehicle)
+            .WithMany(v => v.Schedules)
+            .HasForeignKey(s => s.VehicleId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure Professor-Location relationship
+        modelBuilder.Entity<Professor>()
+            .HasOne(p => p.Location)
+            .WithMany(l => l.Professors)
+            .HasForeignKey(p => p.LocationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Configure Certificate
+        modelBuilder.Entity<Certificate>()
+            .HasIndex(c => c.CertificateNumber)
+            .IsUnique();
+
+        modelBuilder.Entity<Certificate>()
+            .HasIndex(c => c.VerificationCode);
+
+        modelBuilder.Entity<Certificate>()
+            .HasOne(c => c.Student)
+            .WithMany(u => u.Certificates)
+            .HasForeignKey(c => c.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Certificate>()
+            .HasOne(c => c.Enrollment)
+            .WithMany()
+            .HasForeignKey(c => c.EnrollmentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Certificate>()
+            .HasOne(c => c.Course)
+            .WithMany()
+            .HasForeignKey(c => c.CourseId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

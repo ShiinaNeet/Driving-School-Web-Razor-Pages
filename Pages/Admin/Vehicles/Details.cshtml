@@ -1,0 +1,383 @@
+@page
+@model EnrollmentSystem.Pages.Admin.Vehicles.DetailsModel
+@{
+    ViewData["Title"] = "Vehicle Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-car-front-fill me-2"></i>Vehicle Details</h2>
+    <div>
+        <a asp-page="./Edit" asp-route-id="@Model.Vehicle.Id" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a asp-page="/Admin/VehicleMaintenance/Index" asp-route-vehicleId="@Model.Vehicle.Id" class="btn btn-success">
+            <i class="bi bi-wrench me-1"></i>Maintenance
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Vehicle Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Vehicle Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Make & Model:</strong><br />
+                        <span class="h4">@Model.Vehicle.Year @Model.Vehicle.Make @Model.Vehicle.Model</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Color:</strong><br />
+                        @(Model.Vehicle.Color ?? "N/A")
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>License Plate:</strong><br />
+                        <span class="badge bg-secondary fs-6">@Model.Vehicle.LicensePlate</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>VIN:</strong><br />
+                        <code>@Model.Vehicle.VIN</code>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Type:</strong><br />
+                        @Model.Vehicle.Type
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Transmission:</strong><br />
+                        @Model.Vehicle.Transmission
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Capacity:</strong><br />
+                        @Model.Vehicle.Capacity passengers
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Current Mileage:</strong><br />
+                        @Model.Vehicle.CurrentMileage.ToString("N0") miles
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Fuel Level:</strong><br />
+                        @if (Model.Vehicle.FuelLevel.HasValue)
+                        {
+                            <text>@Model.Vehicle.FuelLevel.Value.ToString("F1")%</text>
+                        }
+                        else
+                        {
+                            <text>Not tracked</text>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Status:</strong><br />
+                        @switch (Model.Vehicle.Status)
+                        {
+                            case EnrollmentSystem.Models.VehicleStatus.Available:
+                                <span class="badge bg-success">Available</span>
+                                break;
+                            case EnrollmentSystem.Models.VehicleStatus.InUse:
+                                <span class="badge bg-warning text-dark">In Use</span>
+                                break;
+                            case EnrollmentSystem.Models.VehicleStatus.Maintenance:
+                                <span class="badge bg-danger">Maintenance</span>
+                                break;
+                            case EnrollmentSystem.Models.VehicleStatus.OutOfService:
+                                <span class="badge bg-dark">Out of Service</span>
+                                break;
+                            case EnrollmentSystem.Models.VehicleStatus.Retired:
+                                <span class="badge bg-secondary">Retired</span>
+                                break;
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>Location:</strong><br />
+                        @if (Model.Vehicle.Location != null)
+                        {
+                            <text>@Model.Vehicle.Location.Name</text>
+                            if (!string.IsNullOrEmpty(Model.Vehicle.Location.Address))
+                            {
+                                <br /><small class="text-muted">@Model.Vehicle.Location.Address</small>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not assigned to any location</span>
+                        }
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Vehicle.Notes))
+                {
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Notes:</strong><br />
+                            <p class="text-muted">@Model.Vehicle.Notes</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Important Dates Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Important Dates & Compliance</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Purchase Date:</strong><br />
+                        @(Model.Vehicle.PurchaseDate?.ToString("MMMM dd, yyyy") ?? "N/A")
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Registration Expiry:</strong><br />
+                        @if (Model.Vehicle.RegistrationExpiry.HasValue)
+                        {
+                            var daysUntilExpiry = (Model.Vehicle.RegistrationExpiry.Value - DateTime.Today).Days;
+                            <text>@Model.Vehicle.RegistrationExpiry.Value.ToString("MMMM dd, yyyy")</text>
+                            if (daysUntilExpiry < 30 && daysUntilExpiry > 0)
+                            {
+                                <br /><span class="badge bg-warning text-dark">Expires in @daysUntilExpiry days</span>
+                            }
+                            else if (daysUntilExpiry <= 0)
+                            {
+                                <br /><span class="badge bg-danger">EXPIRED</span>
+                            }
+                        }
+                        else
+                        {
+                            <text>N/A</text>
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Insurance Expiry:</strong><br />
+                        @if (Model.Vehicle.InsuranceExpiry.HasValue)
+                        {
+                            var daysUntilExpiry = (Model.Vehicle.InsuranceExpiry.Value - DateTime.Today).Days;
+                            <text>@Model.Vehicle.InsuranceExpiry.Value.ToString("MMMM dd, yyyy")</text>
+                            if (daysUntilExpiry < 30 && daysUntilExpiry > 0)
+                            {
+                                <br /><span class="badge bg-warning text-dark">Expires in @daysUntilExpiry days</span>
+                            }
+                            else if (daysUntilExpiry <= 0)
+                            {
+                                <br /><span class="badge bg-danger">EXPIRED</span>
+                            }
+                        }
+                        else
+                        {
+                            <text>N/A</text>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Inspection Expiry:</strong><br />
+                        @if (Model.Vehicle.InspectionExpiry.HasValue)
+                        {
+                            var daysUntilExpiry = (Model.Vehicle.InspectionExpiry.Value - DateTime.Today).Days;
+                            <text>@Model.Vehicle.InspectionExpiry.Value.ToString("MMMM dd, yyyy")</text>
+                            if (daysUntilExpiry < 30 && daysUntilExpiry > 0)
+                            {
+                                <br /><span class="badge bg-warning text-dark">Expires in @daysUntilExpiry days</span>
+                            }
+                            else if (daysUntilExpiry <= 0)
+                            {
+                                <br /><span class="badge bg-danger">EXPIRED</span>
+                            }
+                        }
+                        else
+                        {
+                            <text>N/A</text>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Information Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Service Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Last Service Date:</strong><br />
+                        @(Model.Vehicle.LastServiceDate?.ToString("MMMM dd, yyyy") ?? "N/A")
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Last Service Mileage:</strong><br />
+                        @(Model.Vehicle.LastServiceMileage?.ToString("N0") ?? "N/A") miles
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Next Service Date:</strong><br />
+                        @if (Model.Vehicle.NextServiceDate.HasValue)
+                        {
+                            var daysUntilService = (Model.Vehicle.NextServiceDate.Value - DateTime.Today).Days;
+                            <text>@Model.Vehicle.NextServiceDate.Value.ToString("MMMM dd, yyyy")</text>
+                            if (daysUntilService <= 7 && daysUntilService > 0)
+                            {
+                                <br /><span class="badge bg-warning text-dark">Due in @daysUntilService days</span>
+                            }
+                            else if (daysUntilService <= 0)
+                            {
+                                <br /><span class="badge bg-danger">OVERDUE</span>
+                            }
+                        }
+                        else
+                        {
+                            <text>Not scheduled</text>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Next Service Mileage:</strong><br />
+                        @if (Model.Vehicle.NextServiceMileage.HasValue)
+                        {
+                            <text>@Model.Vehicle.NextServiceMileage.Value.ToString("N0") miles</text>
+                            if (Model.Vehicle.CurrentMileage >= Model.Vehicle.NextServiceMileage.Value)
+                            {
+                                <br /><span class="badge bg-danger">OVERDUE</span>
+                            }
+                        }
+                        else
+                        {
+                            <text>Not scheduled</text>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Schedules -->
+        @if (Model.UpcomingSchedules.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Upcoming Schedules (@Model.TotalSchedules total)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <h6>@schedule.Title</h6>
+                                    <small class="text-muted">@schedule.StartTime.ToString("MMM dd, yyyy h:mm tt")</small>
+                                </div>
+                                <small class="text-muted">
+                                    Course: @schedule.Course.Name
+                                    @if (schedule.Professor != null)
+                                    {
+                                        <text> | Instructor: @schedule.Professor.User.FullName</text>
+                                    }
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <!-- Statistics Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Total Schedules:</strong><br />
+                    <span class="h4">@Model.TotalSchedules</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Upcoming Schedules:</strong><br />
+                    <span class="h4">@Model.UpcomingSchedules.Count</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Total Maintenance Cost:</strong><br />
+                    <span class="h4">$@Model.TotalMaintenanceCost.ToString("N2")</span>
+                </div>
+                <div>
+                    <strong>Active:</strong><br />
+                    @if (Model.Vehicle.IsActive)
+                    {
+                        <span class="badge bg-success">Yes</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">No</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Maintenance Card -->
+        @if (Model.MaintenanceRecords.Any())
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Maintenance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        @foreach (var maintenance in Model.MaintenanceRecords.Take(5))
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@maintenance.Type</strong>
+                                    @switch (maintenance.Status)
+                                    {
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Scheduled:
+                                            <span class="badge bg-info text-dark">Scheduled</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.InProgress:
+                                            <span class="badge bg-warning text-dark">In Progress</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Completed:
+                                            <span class="badge bg-success">Completed</span>
+                                            break;
+                                        case EnrollmentSystem.Models.MaintenanceStatus.Cancelled:
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                            break;
+                                    }
+                                </div>
+                                <small class="text-muted">
+                                    @maintenance.Description<br />
+                                    @maintenance.ScheduledDate.ToString("MMM dd, yyyy")
+                                    @if (maintenance.Cost.HasValue)
+                                    {
+                                        <text> | $@maintenance.Cost.Value.ToString("N2")</text>
+                                    }
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-page="./Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>

@@ -4,94 +4,238 @@
     ViewData["Title"] = "Guardian Dashboard";
 }
 
-<div class="container-fluid">
-    <h2 class="mb-4">Welcome, @Model.CurrentUser.FirstName!</h2>
+<h2>Guardian Dashboard</h2>
+<p class="text-muted">Welcome back, @Model.CurrentUser.FirstName @Model.CurrentUser.LastName</p>
 
-    <div class="row">
-        <div class="col-md-12">
-            <h4>My Students</h4>
-            @foreach (var guardian in Model.MyGuardianRecords)
-            {
-                var student = guardian.Student;
-                var enrollments = Model.StudentEnrollments.Where(e => e.StudentId == student.Id).ToList();
-                var payments = Model.StudentPayments.Where(p => p.StudentId == student.Id).ToList();
+@foreach (var studentProgress in Model.StudentsProgress)
+{
+    var student = studentProgress.GuardianRecord.Student;
+    var totalBalance = studentProgress.Enrollments.Sum(e => e.Balance);
 
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">@student.FirstName @student.LastName (@guardian.Relationship)</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <strong>Email:</strong> @student.Email
-                            </div>
-                            <div class="col-md-4">
-                                <strong>Phone:</strong> @student.Phone
-                            </div>
-                            <div class="col-md-4">
-                                <strong>Status:</strong> <span class="badge bg-success">@student.Status</span>
-                            </div>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-person"></i> @student.FirstName @student.LastName
+                <span class="badge bg-light text-dark ms-2">@studentProgress.GuardianRecord.Relationship</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Enrollments</h6>
+                            <h3 class="mb-0">@studentProgress.Enrollments.Count</h3>
                         </div>
-
-                        <h6>Enrollments</h6>
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Total Fee</th>
-                                    <th>Paid</th>
-                                    <th>Balance</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var enrollment in enrollments)
-                                {
-                                    <tr>
-                                        <td>@enrollment.Course.Name</td>
-                                        <td>$@enrollment.TotalFee.ToString("N2")</td>
-                                        <td>$@enrollment.PaidAmount.ToString("N2")</td>
-                                        <td>
-                                            @if (enrollment.Balance > 0)
-                                            {
-                                                <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-success">Paid</span>
-                                            }
-                                        </td>
-                                        <td><span class="badge bg-info">@enrollment.Status</span></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-
-                        <h6 class="mt-3">Recent Payments</h6>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Course</th>
-                                    <th>Amount</th>
-                                    <th>Method</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var payment in payments.Take(5))
-                                {
-                                    <tr>
-                                        <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
-                                        <td>@payment.Enrollment.Course.Name</td>
-                                        <td>$@payment.Amount.ToString("N2")</td>
-                                        <td>@payment.PaymentMethod</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
                     </div>
                 </div>
-            }
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Average Grade</h6>
+                            <h3 class="mb-0">@studentProgress.AverageGrade.ToString("F1")%</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Attendance</h6>
+                            <h3 class="mb-0">@studentProgress.AttendancePercentage%</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <h6 class="card-title">Balance Due</h6>
+                            <h3 class="mb-0">$@totalBalance.ToString("N2")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Enrollments -->
+                    <h6><i class="bi bi-mortarboard"></i> Current Enrollments</h6>
+                    @if (studentProgress.Enrollments.Any())
+                    {
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Total Fee</th>
+                                        <th>Paid</th>
+                                        <th>Balance</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var enrollment in studentProgress.Enrollments)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@enrollment.Course.Name</strong><br />
+                                                <small class="text-muted">@enrollment.Course.Code</small>
+                                            </td>
+                                            <td>$@enrollment.TotalFee.ToString("N2")</td>
+                                            <td>$@enrollment.PaidAmount.ToString("N2")</td>
+                                            <td>
+                                                @if (enrollment.Balance > 0)
+                                                {
+                                                    <span class="text-danger fw-bold">$@enrollment.Balance.ToString("N2")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-success">Paid</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-@(enrollment.Status == EnrollmentStatus.Active ? "success" : enrollment.Status == EnrollmentStatus.Pending ? "warning" : "info")">
+                                                    @enrollment.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-4">No active enrollments.</div>
+                    }
+
+                    <!-- Upcoming Classes -->
+                    <h6><i class="bi bi-calendar"></i> Upcoming Classes</h6>
+                    @if (studentProgress.UpcomingClasses.Any())
+                    {
+                        <div class="list-group mb-4">
+                            @foreach (var schedule in studentProgress.UpcomingClasses)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">@schedule.Title</h6>
+                                            <p class="mb-1 small">
+                                                <strong>Course:</strong> @schedule.Course?.Name<br />
+                                                <strong>Subject:</strong> @schedule.Subject?.Name<br />
+                                                <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, h:mm tt")<br />
+                                                <strong>Location:</strong> @schedule.Location
+                                            </p>
+                                            <span class="badge bg-info">@schedule.Type</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-4">No upcoming classes scheduled.</div>
+                    }
+
+                    <!-- Recent Payments -->
+                    <h6><i class="bi bi-credit-card"></i> Recent Payments</h6>
+                    @if (studentProgress.Payments.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Course</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in studentProgress.Payments.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@payment.Enrollment.Course.Name</td>
+                                            <td>$@payment.Amount.ToString("N2")</td>
+                                            <td>@payment.PaymentMethod</td>
+                                            <td>
+                                                <span class="badge bg-@(payment.Status == PaymentStatus.Completed ? "success" : "warning")">
+                                                    @payment.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">No payment history.</div>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Recent Grades -->
+                    <h6><i class="bi bi-clipboard-check"></i> Recent Grades</h6>
+                    @if (studentProgress.RecentGrades.Any())
+                    {
+                        <div class="list-group list-group-flush mb-4">
+                            @foreach (var grade in studentProgress.RecentGrades)
+                            {
+                                var percentage = (grade.Score / grade.MaxScore) * 100;
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div>
+                                            <h6 class="mb-0 small">@grade.Subject?.Name</h6>
+                                            <small class="text-muted">@grade.Enrollment.Course.Name</small>
+                                            <br />
+                                            <span class="badge bg-info">@grade.Type</span>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-@(percentage >= 75 ? "success" : percentage >= 60 ? "warning" : "danger")">
+                                                @percentage.ToString("F1")%
+                                            </span>
+                                            <br />
+                                            <small class="text-muted">@grade.Score/@grade.MaxScore</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-4">No grades recorded yet.</div>
+                    }
+
+                    <!-- Payment Reminder -->
+                    @if (totalBalance > 0)
+                    {
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">Payment Reminder</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Outstanding Balance:</strong></p>
+                                <h4 class="text-danger">$@totalBalance.ToString("N2")</h4>
+                                <p class="small mb-0">Please contact the administration to make a payment.</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
-</div>
+}
+
+@if (!Model.StudentsProgress.Any())
+{
+    <div class="alert alert-info">
+        <h5>No Students Assigned</h5>
+        <p>You don't have any students assigned to your guardian account. Please contact the administrator.</p>
+    </div>
+}

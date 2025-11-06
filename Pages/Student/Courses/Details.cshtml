@@ -1,0 +1,215 @@
+@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = Model.Course.Name;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="./Index">Courses</a></li>
+        <li class="breadcrumb-item active">@Model.Course.Name</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-8">
+        @if (Model.IsEnrolled)
+        {
+            <div class="alert alert-success">
+                <h5><i class="bi bi-check-circle-fill"></i> You are enrolled in this course</h5>
+                <p class="mb-0">
+                    <strong>Status:</strong> <span class="badge bg-@(Model.UserEnrollment!.Status == EnrollmentStatus.Active ? "success" : Model.UserEnrollment.Status == EnrollmentStatus.Pending ? "warning" : "secondary")">@Model.UserEnrollment.Status</span>
+                    <br />
+                    <strong>Enrollment Date:</strong> @Model.UserEnrollment.EnrollmentDate.ToString("MMM dd, yyyy")
+                    <br />
+                    <strong>Balance:</strong> $@Model.UserEnrollment.Balance.ToString("N2")
+                </p>
+            </div>
+        }
+
+        <div class="card mb-4">
+            @if (!string.IsNullOrEmpty(Model.Course.ImagePath))
+            {
+                <img src="/@Model.Course.ImagePath" class="card-img-top" alt="@Model.Course.Name" style="max-height: 400px; object-fit: cover;" />
+            }
+            <div class="card-body">
+                <h2>@Model.Course.Name</h2>
+                <p class="text-muted">@Model.Course.Code</p>
+                <p class="lead">@Model.Course.Description</p>
+
+                @if (!string.IsNullOrEmpty(Model.Course.Prerequisites))
+                {
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Prerequisites</h6>
+                        <p class="mb-0">@Model.Course.Prerequisites</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Course Subjects (@Model.CourseSubjects.Count)</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CourseSubjects.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var cs in Model.CourseSubjects)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            @if (!string.IsNullOrEmpty(cs.Subject.ImagePath))
+                                            {
+                                                <img src="/@cs.Subject.ImagePath" alt="@cs.Subject.Name" class="me-3" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" />
+                                            }
+                                            <div>
+                                                <h6 class="mb-0">@cs.Subject.Code - @cs.Subject.Name</h6>
+                                                <small class="text-muted">@cs.Subject.Credits credits</small>
+                                            </div>
+                                        </div>
+                                        <p class="mb-1">@cs.Subject.Description</p>
+                                        @if (cs.Subject.Professor != null)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="bi bi-person"></i> Professor: @cs.Subject.Professor.User.FirstName @cs.Subject.Professor.User.LastName
+                                            </small>
+                                        }
+                                    </div>
+                                    <div class="ms-3">
+                                        @if (cs.IsRequired)
+                                        {
+                                            <span class="badge bg-danger">Required</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Optional</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No subjects have been assigned to this course yet.</p>
+                }
+            </div>
+        </div>
+
+        @if (Model.UpcomingSchedules.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Upcoming Classes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Subject:</strong> @schedule.Subject?.Name<br />
+                                            <strong>Professor:</strong> @schedule.Professor?.User.FirstName @schedule.Professor?.User.LastName<br />
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, yyyy h:mm tt") - @schedule.EndTime.ToString("h:mm tt")<br />
+                                            <strong>Location:</strong> @schedule.Location
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Course Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <strong>Duration:</strong><br />
+                        @Model.Course.DurationWeeks weeks
+                    </li>
+                    <li class="mb-2">
+                        <strong>Total Fee:</strong><br />
+                        <span class="h4 text-primary">$@Model.Course.TotalFee.ToString("N2")</span>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Status:</strong><br />
+                        <span class="badge bg-@(Model.Course.Status == CourseStatus.Active ? "success" : "secondary")">
+                            @Model.Course.Status
+                        </span>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Availability:</strong><br />
+                        @if (Model.Course.MaxStudents.HasValue)
+                        {
+                            <span>@Model.AvailableSlots of @Model.Course.MaxStudents.Value slots available</span>
+                            var percentage = ((double)Model.EnrolledCount / Model.Course.MaxStudents.Value) * 100;
+                            <div class="progress mt-1" style="height: 10px;">
+                                <div class="progress-bar bg-@(percentage >= 90 ? "danger" : percentage >= 70 ? "warning" : "success")"
+                                     role="progressbar"
+                                     style="width: @percentage%"></div>
+                            </div>
+                        }
+                        else
+                        {
+                            <span>Unlimited slots</span>
+                        }
+                    </li>
+                    <li class="mb-2">
+                        <strong>Total Subjects:</strong><br />
+                        @Model.CourseSubjects.Count subjects
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        @if (!Model.IsEnrolled && Model.Course.Status == CourseStatus.Active && Model.AvailableSlots > 0)
+        {
+            <div class="d-grid">
+                <a asp-page="./Enroll" asp-route-id="@Model.Course.Id" class="btn btn-primary btn-lg">
+                    <i class="bi bi-pencil-square"></i> Enroll Now
+                </a>
+            </div>
+        }
+        else if (Model.IsEnrolled)
+        {
+            <div class="d-grid">
+                <a asp-page="/Student/Index" class="btn btn-success btn-lg">
+                    <i class="bi bi-house"></i> Go to My Dashboard
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <strong>Enrollment Not Available</strong><br />
+                This course is currently not accepting new enrollments.
+            </div>
+        }
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Need Help?</h6>
+            </div>
+            <div class="card-body">
+                <p class="small mb-0">
+                    If you have questions about this course, please contact our admissions office or speak with an advisor.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

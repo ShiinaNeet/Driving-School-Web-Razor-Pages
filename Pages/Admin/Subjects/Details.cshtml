@@ -1,0 +1,107 @@
+@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = "Subject Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Subject Details</h2>
+    <div>
+        <a asp-page="./Edit" asp-route-id="@Model.Subject!.Id" class="btn btn-warning">Edit</a>
+        <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.Subject.ImagePath))
+                {
+                    <div class="mb-4 text-center">
+                        <img src="/@Model.Subject.ImagePath" alt="@Model.Subject.Name" class="img-fluid rounded" style="max-height: 300px;">
+                    </div>
+                }
+
+                <dl class="row">
+                    <dt class="col-sm-3">Code</dt>
+                    <dd class="col-sm-9">@Model.Subject.Code</dd>
+
+                    <dt class="col-sm-3">Name</dt>
+                    <dd class="col-sm-9">@Model.Subject.Name</dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">@(Model.Subject.Description ?? "No description provided")</dd>
+
+                    <dt class="col-sm-3">Credits</dt>
+                    <dd class="col-sm-9">@Model.Subject.Credits</dd>
+
+                    <dt class="col-sm-3">Professor</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Subject.Professor != null)
+                        {
+                            <span>@Model.Subject.Professor.User.FirstName @Model.Subject.Professor.User.LastName</span>
+                            <br />
+                            <small class="text-muted">@Model.Subject.Professor.Specialization</small>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not assigned</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Subject.Status == SubjectStatus.Active)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Created</dt>
+                    <dd class="col-sm-9">@Model.Subject.CreatedAt.ToString("g")</dd>
+
+                    @if (Model.Subject.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Last Updated</dt>
+                        <dd class="col-sm-9">@Model.Subject.UpdatedAt.Value.ToString("g")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Courses Using This Subject</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CoursesUsingSubject.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var courseSubject in Model.CoursesUsingSubject)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@courseSubject.Course.Code</strong> - @courseSubject.Course.Name
+                                    @if (courseSubject.IsRequired)
+                                    {
+                                        <span class="badge bg-danger ms-2">Required</span>
+                                    }
+                                </div>
+                                <span class="text-muted">Order: @courseSubject.Order</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">This subject is not used in any courses yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

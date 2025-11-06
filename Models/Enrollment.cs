@@ -44,6 +44,7 @@ public class Enrollment
     public Course Course { get; set; } = null!;
 
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
 }
 
 public enum EnrollmentStatus

@@ -1,0 +1,148 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Course Catalog";
+}
+
+<h2>Course Catalog</h2>
+<p class="text-muted">Browse and enroll in available driving courses</p>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Search & Filter</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="searchTerm" class="form-label">Search Courses</label>
+                <input type="text" id="searchTerm" name="SearchTerm" class="form-control" asp-for="SearchTerm" placeholder="Search by name, code, or description..." />
+            </div>
+            <div class="col-md-3">
+                <label for="statusFilter" class="form-label">Status</label>
+                <select id="statusFilter" name="StatusFilter" class="form-select" asp-for="StatusFilter">
+                    <option value="">All Active Courses</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Full">Full</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Search</button>
+                <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Courses.Any())
+{
+    <div class="row">
+        @foreach (var courseInfo in Model.Courses)
+        {
+            var isEnrolled = Model.EnrolledCourseIds.Contains(courseInfo.Course.Id);
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 @(isEnrolled ? "border-success" : "")">
+                    @if (!string.IsNullOrEmpty(courseInfo.Course.ImagePath))
+                    {
+                        <img src="/@courseInfo.Course.ImagePath" class="card-img-top" alt="@courseInfo.Course.Name" style="height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-car-front" style="font-size: 3rem; color: white;"></i>
+                        </div>
+                    }
+
+                    @if (isEnrolled)
+                    {
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-success">Enrolled</span>
+                        </div>
+                    }
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@courseInfo.Course.Name</h5>
+                        <p class="text-muted mb-2">@courseInfo.Course.Code</p>
+                        <p class="card-text flex-grow-1">@courseInfo.Course.Description</p>
+
+                        <div class="mb-3">
+                            <div class="row text-center">
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Duration</small>
+                                    <div><strong>@courseInfo.Course.DurationWeeks weeks</strong></div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Total Fee</small>
+                                    <div><strong>$@courseInfo.Course.TotalFee.ToString("N2")</strong></div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Subjects</small>
+                                    <div><strong>@courseInfo.SubjectCount</strong></div>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <small class="text-muted">Availability</small>
+                                    <div>
+                                        @if (courseInfo.Course.MaxStudents.HasValue)
+                                        {
+                                            <strong>@courseInfo.AvailableSlots / @courseInfo.Course.MaxStudents.Value</strong>
+                                        }
+                                        else
+                                        {
+                                            <strong>Unlimited</strong>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (courseInfo.Course.MaxStudents.HasValue)
+                            {
+                                var percentage = ((double)courseInfo.EnrolledCount / courseInfo.Course.MaxStudents.Value) * 100;
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-@(percentage >= 90 ? "danger" : percentage >= 70 ? "warning" : "success")"
+                                         role="progressbar"
+                                         style="width: @percentage%"
+                                         aria-valuenow="@percentage"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"></div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mt-auto">
+                            <span class="badge bg-@(courseInfo.Course.Status == CourseStatus.Active ? "success" : courseInfo.Course.Status == CourseStatus.Full ? "danger" : "secondary") mb-2">
+                                @courseInfo.Course.Status
+                            </span>
+
+                            <div class="d-grid gap-2">
+                                <a asp-page="./Details" asp-route-id="@courseInfo.Course.Id" class="btn btn-outline-primary btn-sm">
+                                    View Details
+                                </a>
+                                @if (!isEnrolled && courseInfo.IsAvailable)
+                                {
+                                    <a asp-page="./Enroll" asp-route-id="@courseInfo.Course.Id" class="btn btn-primary btn-sm">
+                                        Enroll Now
+                                    </a>
+                                }
+                                else if (isEnrolled)
+                                {
+                                    <span class="btn btn-success btn-sm disabled">Already Enrolled</span>
+                                }
+                                else
+                                {
+                                    <span class="btn btn-secondary btn-sm disabled">Not Available</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No Courses Found</h5>
+        <p>No courses match your search criteria. Try adjusting your filters or check back later.</p>
+    </div>
+}

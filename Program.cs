@@ -42,6 +42,7 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/Librarian", "RequireLibrarianRole");
     options.Conventions.AuthorizeFolder("/Student", "RequireStudentRole");
     options.Conventions.AuthorizeFolder("/Guardian", "RequireGuardianRole");
+    options.Conventions.AuthorizeFolder("/Professor", "RequireProfessorRole");
 });
 
 builder.Services.AddAuthorization(options =>
@@ -75,6 +76,7 @@ builder.Services.AddHangfireServer();
 // Register custom services
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<PendingPaymentNotificationJob>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 

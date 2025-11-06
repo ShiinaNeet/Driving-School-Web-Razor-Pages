@@ -1,0 +1,130 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Course Materials";
+}
+
+<h2>Course Materials</h2>
+<p class="text-muted">Manage learning materials for your subjects</p>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">My Teaching Materials</h5>
+        <a asp-page="./Upload" class="btn btn-primary btn-sm">
+            <i class="bi bi-upload"></i> Upload New Material
+        </a>
+    </div>
+    <div class="card-body">
+        @if (Model.SubjectMaterials.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Visibility</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var material in Model.SubjectMaterials)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@material.Subject.Code</strong><br />
+                                    <small class="text-muted">@material.Subject.Name</small>
+                                </td>
+                                <td>@material.FileName</td>
+                                <td>
+                                    <span class="badge bg-@(material.Type == MaterialType.Syllabus ? "primary" : material.Type == MaterialType.Lecture ? "info" : material.Type == MaterialType.Assignment ? "warning" : material.Type == MaterialType.Video ? "success" : "secondary")">
+                                        @material.Type
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (material.IsPublic)
+                                    {
+                                        <span class="badge bg-success">Public</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Private</span>
+                                    }
+                                </td>
+                                <td>@material.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <a href="/@material.FilePath" target="_blank" class="btn btn-sm btn-outline-primary" download>
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@material.Id" class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this material?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h5>No Materials Yet</h5>
+                <p>You haven't uploaded any course materials yet. Click the "Upload New Material" button to get started.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">My Subjects</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.ProfessorSubjects.Any())
+                {
+                    <div class="row">
+                        @foreach (var subject in Model.ProfessorSubjects)
+                        {
+                            var materialsCount = Model.SubjectMaterials.Count(m => m.SubjectId == subject.Id);
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        @if (!string.IsNullOrEmpty(subject.ImagePath))
+                                        {
+                                            <img src="/@subject.ImagePath" alt="@subject.Name" class="img-fluid mb-2" style="max-height: 150px; object-fit: cover; width: 100%;" />
+                                        }
+                                        <h6>@subject.Code - @subject.Name</h6>
+                                        <p class="mb-1">
+                                            <small>@subject.Credits credits</small>
+                                        </p>
+                                        <span class="badge bg-info">@materialsCount Materials</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No subjects assigned to you yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

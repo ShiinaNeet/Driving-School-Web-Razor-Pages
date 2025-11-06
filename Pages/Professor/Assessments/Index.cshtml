@@ -1,0 +1,163 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Student Assessments & Grades";
+}
+
+<h2>Student Assessments & Grades</h2>
+<p class="text-muted">Manage and view student grades and assessments</p>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filter Students</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="selectedCourseId" class="form-label">Course</label>
+                <select id="selectedCourseId" name="SelectedCourseId" class="form-select" asp-for="SelectedCourseId" asp-items="Model.CourseList">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="selectedSubjectId" class="form-label">Subject</label>
+                <select id="selectedSubjectId" name="SelectedSubjectId" class="form-select" asp-for="SelectedSubjectId">
+                    <option value="">All Subjects</option>
+                    @foreach (var subject in Model.ProfessorSubjects)
+                    {
+                        <option value="@subject.Id" selected="@(Model.SelectedSubjectId == subject.Id)">@subject.Code - @subject.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.StudentGradesList.Any())
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Students (@Model.StudentGradesList.Count)</h5>
+            <a asp-page="./Create" asp-route-courseId="@Model.SelectedCourseId" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Add New Grade
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Course</th>
+                            <th>Total Assessments</th>
+                            <th>Passed</th>
+                            <th>Average Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in Model.StudentGradesList)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@student.StudentName</strong><br />
+                                    <small class="text-muted">@student.Email</small>
+                                </td>
+                                <td>@student.CourseName</td>
+                                <td>
+                                    <span class="badge bg-info">@student.TotalAssessments</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(student.PassedAssessments == student.TotalAssessments && student.TotalAssessments > 0 ? "success" : student.PassedAssessments > 0 ? "warning" : "danger")">
+                                        @student.PassedAssessments / @student.TotalAssessments
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (student.TotalAssessments > 0)
+                                    {
+                                        var scoreClass = student.AverageScore >= 75 ? "success" : student.AverageScore >= 60 ? "warning" : "danger";
+                                        <span class="badge bg-@scoreClass">@student.AverageScore.ToString("F1")%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No grades</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-page="./Create" asp-route-enrollmentId="@student.EnrollmentId" class="btn btn-sm btn-primary">
+                                        Add Grade
+                                    </a>
+                                    @if (student.Assessments.Any())
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#grades-@student.EnrollmentId">
+                                            View Grades
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                            @if (student.Assessments.Any())
+                            {
+                                <tr class="collapse" id="grades-@student.EnrollmentId">
+                                    <td colspan="6">
+                                        <div class="p-3 bg-light">
+                                            <h6>Assessment Details</h6>
+                                            <table class="table table-sm table-bordered mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Subject</th>
+                                                        <th>Type</th>
+                                                        <th>Score</th>
+                                                        <th>Max Score</th>
+                                                        <th>Percentage</th>
+                                                        <th>Status</th>
+                                                        <th>Date</th>
+                                                        <th>Remarks</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var assessment in student.Assessments.OrderByDescending(a => a.CreatedAt))
+                                                    {
+                                                        var percentage = (assessment.Score / assessment.MaxScore) * 100;
+                                                        <tr>
+                                                            <td>@assessment.Subject?.Name</td>
+                                                            <td><span class="badge bg-info">@assessment.Type</span></td>
+                                                            <td>@assessment.Score</td>
+                                                            <td>@assessment.MaxScore</td>
+                                                            <td>
+                                                                <span class="badge bg-@(percentage >= 75 ? "success" : percentage >= 60 ? "warning" : "danger")">
+                                                                    @percentage.ToString("F1")%
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-@(assessment.Passed ? "success" : "danger")">
+                                                                    @(assessment.Passed ? "Passed" : "Failed")
+                                                                </span>
+                                                            </td>
+                                                            <td>@assessment.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                                            <td>@assessment.Remarks</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No Students Found</h5>
+        <p>There are no enrolled students matching your filters, or you have no assigned courses yet.</p>
+    </div>
+}

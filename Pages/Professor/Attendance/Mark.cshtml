@@ -1,0 +1,123 @@
+@page "{id:int}"
+@model MarkModel
+@{
+    ViewData["Title"] = "Mark Attendance";
+}
+
+<h2>Mark Attendance</h2>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Class Details</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Title:</strong> @Model.Schedule.Title</p>
+                <p><strong>Course:</strong> @Model.Schedule.Course?.Name</p>
+                @if (Model.Schedule.Subject != null)
+                {
+                    <p><strong>Subject:</strong> @Model.Schedule.Subject.Name</p>
+                }
+            </div>
+            <div class="col-md-6">
+                <p><strong>Type:</strong> <span class="badge bg-info">@Model.Schedule.Type</span></p>
+                <p><strong>Date & Time:</strong> @Model.Schedule.StartTime.ToString("MMMM dd, yyyy h:mm tt")</p>
+                <p><strong>Location:</strong> @Model.Schedule.Location</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Student Attendance (@Model.Students.Count students)</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Previous Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Students.Count; i++)
+                        {
+                            var student = Model.Students[i];
+                            <tr>
+                                <td>@student.StudentName</td>
+                                <td>@student.Email</td>
+                                <td>
+                                    <input type="hidden" asp-for="AttendanceInputs[i].StudentId" value="@student.StudentId" />
+                                    <select asp-for="AttendanceInputs[i].Status" class="form-select form-select-sm">
+                                        <option value="@AttendanceStatus.Present" selected="@(student.Status == AttendanceStatus.Present)">Present</option>
+                                        <option value="@AttendanceStatus.Absent" selected="@(student.Status == AttendanceStatus.Absent || student.Status == null)">Absent</option>
+                                        <option value="@AttendanceStatus.Late" selected="@(student.Status == AttendanceStatus.Late)">Late</option>
+                                        <option value="@AttendanceStatus.Excused" selected="@(student.Status == AttendanceStatus.Excused)">Excused</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" asp-for="AttendanceInputs[i].Remarks" class="form-control form-control-sm" placeholder="Optional notes" />
+                                </td>
+                                <td>
+                                    @if (student.Status.HasValue)
+                                    {
+                                        <span class="badge bg-@(student.Status == AttendanceStatus.Present ? "success" : student.Status == AttendanceStatus.Late ? "warning" : student.Status == AttendanceStatus.Excused ? "info" : "danger")">
+                                            @student.Status
+                                        </span>
+                                        @if (student.CheckInTime.HasValue)
+                                        {
+                                            <br />
+                                            <small class="text-muted">@student.CheckInTime.Value.ToString("h:mm tt")</small>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Not Taken</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">Save Attendance</button>
+                <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
+            </div>
+
+            <div class="mt-3">
+                <div class="alert alert-info">
+                    <strong>Quick Actions:</strong>
+                    <button type="button" class="btn btn-sm btn-success ms-2" onclick="markAll('Present')">Mark All Present</button>
+                    <button type="button" class="btn btn-sm btn-danger ms-2" onclick="markAll('Absent')">Mark All Absent</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function markAll(status) {
+            const selects = document.querySelectorAll('select[name*="Status"]');
+            selects.forEach(select => {
+                const statusValue = @((int)AttendanceStatus.Present);
+                const absentValue = @((int)AttendanceStatus.Absent);
+
+                if (status === 'Present') {
+                    select.value = statusValue;
+                } else if (status === 'Absent') {
+                    select.value = absentValue;
+                }
+            });
+        }
+    </script>
+}

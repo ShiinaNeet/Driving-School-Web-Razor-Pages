@@ -1,0 +1,229 @@
+@page "{id:int}"
+@model DetailsModel
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Course Details</h2>
+    <div>
+        <a asp-page="./Edit" asp-route-id="@Model.Course!.Id" class="btn btn-warning">Edit</a>
+        <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.Course.ImagePath))
+                {
+                    <div class="mb-4 text-center">
+                        <img src="/@Model.Course.ImagePath" alt="@Model.Course.Name" class="img-fluid rounded" style="max-height: 400px;">
+                    </div>
+                }
+
+                <dl class="row">
+                    <dt class="col-sm-3">Code</dt>
+                    <dd class="col-sm-9"><strong>@Model.Course.Code</strong></dd>
+
+                    <dt class="col-sm-3">Name</dt>
+                    <dd class="col-sm-9">@Model.Course.Name</dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">@(Model.Course.Description ?? "No description provided")</dd>
+
+                    <dt class="col-sm-3">Duration</dt>
+                    <dd class="col-sm-9">@Model.Course.DurationWeeks weeks</dd>
+
+                    <dt class="col-sm-3">Total Fee</dt>
+                    <dd class="col-sm-9"><strong>$@Model.Course.TotalFee.ToString("N2")</strong></dd>
+
+                    <dt class="col-sm-3">Max Students</dt>
+                    <dd class="col-sm-9">@Model.Course.MaxStudents students</dd>
+
+                    <dt class="col-sm-3">Current Enrollments</dt>
+                    <dd class="col-sm-9">
+                        @Model.EnrollmentCount students
+                        @if (Model.EnrollmentCount >= Model.Course.MaxStudents)
+                        {
+                            <span class="badge bg-danger ms-2">Full</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Course.Status == CourseStatus.Active)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else if (Model.Course.Status == CourseStatus.Inactive)
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Archived</span>
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Course.Prerequisites))
+                    {
+                        <dt class="col-sm-3">Prerequisites</dt>
+                        <dd class="col-sm-9">@Model.Course.Prerequisites</dd>
+                    }
+
+                    <dt class="col-sm-3">Created</dt>
+                    <dd class="col-sm-9">@Model.Course.CreatedAt.ToString("g")</dd>
+
+                    @if (Model.Course.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Last Updated</dt>
+                        <dd class="col-sm-9">@Model.Course.UpdatedAt.Value.ToString("g")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Subjects in This Course</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CourseSubjects.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var cs in Model.CourseSubjects.OrderBy(x => x.Order))
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">@cs.Subject.Code - @cs.Subject.Name</h6>
+                                        <small class="text-muted">@cs.Subject.Credits credits</small>
+                                        @if (cs.IsRequired)
+                                        {
+                                            <span class="badge bg-danger ms-2">Required</span>
+                                        }
+                                    </div>
+                                    <span class="badge bg-secondary">Order: @cs.Order</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No subjects assigned to this course yet.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Enrollments</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentEnrollments.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Enrollment Date</th>
+                                    <th>Status</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var enrollment in Model.RecentEnrollments)
+                                {
+                                    <tr>
+                                        <td>@enrollment.Student.FirstName @enrollment.Student.LastName</td>
+                                        <td>@enrollment.EnrollmentDate.ToString("d")</td>
+                                        <td>
+                                            @if (enrollment.Status == EnrollmentStatus.Active)
+                                            {
+                                                <span class="badge bg-success">@enrollment.Status</span>
+                                            }
+                                            else if (enrollment.Status == EnrollmentStatus.Pending)
+                                            {
+                                                <span class="badge bg-warning">@enrollment.Status</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@enrollment.Status</span>
+                                            }
+                                        </td>
+                                        <td>$@enrollment.Balance.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No enrollments for this course yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Total Enrollments</small>
+                    <h4>@Model.EnrollmentCount</h4>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Active Enrollments</small>
+                    <h4>@Model.ActiveEnrollmentCount</h4>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Total Revenue</small>
+                    <h4>$@Model.TotalRevenue.ToString("N2")</h4>
+                </div>
+                <div>
+                    <small class="text-muted">Availability</small>
+                    <div class="progress" style="height: 25px;">
+                        @{
+                            var percentage = Model.Course.MaxStudents > 0 ? (Model.EnrollmentCount * 100.0 / Model.Course.MaxStudents) : 0;
+                        }
+                        <div class="progress-bar @(percentage >= 90 ? "bg-danger" : percentage >= 70 ? "bg-warning" : "bg-success")"
+                             role="progressbar"
+                             style="width: @percentage%"
+                             aria-valuenow="@percentage"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            @percentage.ToString("F0")%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-page="../Materials/Index" asp-route-courseId="@Model.Course.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-file-earmark"></i> Manage Materials
+                    </a>
+                    <a asp-page="../Schedules/Index" asp-route-courseId="@Model.Course.Id" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-calendar"></i> View Schedule
+                    </a>
+                    <a asp-page="../Enrollments/Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-people"></i> View All Enrollments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

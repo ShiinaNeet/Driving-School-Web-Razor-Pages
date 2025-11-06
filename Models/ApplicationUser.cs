@@ -25,6 +25,7 @@ public class ApplicationUser : IdentityUser
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public ICollection<ChatMessage> SentMessages { get; set; } = new List<ChatMessage>();
     public ICollection<ChatMessage> ReceivedMessages { get; set; } = new List<ChatMessage>();
+    public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
 }
 
 public enum Gender

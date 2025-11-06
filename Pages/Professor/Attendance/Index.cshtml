@@ -1,0 +1,176 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Attendance Management";
+}
+
+<h2>Attendance Management</h2>
+<p class="text-muted">Mark and manage student attendance for your classes</p>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Today's Classes</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TodaySchedules.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Course</th>
+                                    <th>Subject</th>
+                                    <th>Type</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Attendance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var schedule in Model.TodaySchedules)
+                                {
+                                    <tr>
+                                        <td>@schedule.StartTime.ToString("h:mm tt") - @schedule.EndTime.ToString("h:mm tt")</td>
+                                        <td>@schedule.Course?.Name</td>
+                                        <td>@schedule.Subject?.Name</td>
+                                        <td><span class="badge bg-info">@schedule.Type</span></td>
+                                        <td>@schedule.Location</td>
+                                        <td>
+                                            <span class="badge bg-@(schedule.Status == ScheduleStatus.Scheduled ? "success" : schedule.Status == ScheduleStatus.InProgress ? "warning" : "secondary")">
+                                                @schedule.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (Model.GetAttendanceCount(schedule) > 0)
+                                            {
+                                                <span class="badge bg-success">
+                                                    @Model.GetPresentCount(schedule) / @Model.GetAttendanceCount(schedule) Present
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Not Taken</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-page="./Mark" asp-route-id="@schedule.Id" class="btn btn-sm btn-primary">
+                                                @(Model.GetAttendanceCount(schedule) > 0 ? "Update" : "Mark") Attendance
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No classes scheduled for today.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Upcoming Classes (Next 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.UpcomingSchedules.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.UpcomingSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Course:</strong> @schedule.Course?.Name<br />
+                                            @if (schedule.Subject != null)
+                                            {
+                                                <strong>Subject:</strong> @schedule.Subject.Name <br />
+                                            }
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, h:mm tt")<br />
+                                            <strong>Location:</strong> @schedule.Location
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                    </div>
+                                    <div>
+                                        <a asp-page="./Mark" asp-route-id="@schedule.Id" class="btn btn-sm btn-outline-primary">
+                                            Mark Attendance
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No upcoming classes in the next 7 days.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Recent Classes (Last 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentSchedules.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var schedule in Model.RecentSchedules)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">@schedule.Title</h6>
+                                        <p class="mb-1">
+                                            <strong>Course:</strong> @schedule.Course?.Name<br />
+                                            @if (schedule.Subject != null)
+                                            {
+                                                <strong>Subject:</strong> @schedule.Subject.Name <br />
+                                            }
+                                            <strong>Time:</strong> @schedule.StartTime.ToString("MMM dd, h:mm tt")
+                                        </p>
+                                        <span class="badge bg-info">@schedule.Type</span>
+                                        @if (Model.GetAttendanceCount(schedule) > 0)
+                                        {
+                                            <span class="badge bg-success">
+                                                @Model.GetPresentCount(schedule)/@Model.GetAttendanceCount(schedule) Present
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Not Taken</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <a asp-page="./Mark" asp-route-id="@schedule.Id" class="btn btn-sm btn-outline-secondary">
+                                            View/Edit
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No recent classes found.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
